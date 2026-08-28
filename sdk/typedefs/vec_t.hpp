@@ -99,6 +99,18 @@ public:
 		return vec3_t();
 	}
 
+	vec3_t normalize_in_place()
+	{
+		const float flLength = this->length();
+		const float flRadius = 1.0f / (flLength + std::numeric_limits<float>::epsilon());
+
+		this->x *= flRadius;
+		this->y *= flRadius;
+		this->z *= flRadius;
+
+		return flLength;
+	}
+
 	bool is_valid() const {
 		return std::isfinite(x) && std::isfinite(y) && std::isfinite(z);
 	}

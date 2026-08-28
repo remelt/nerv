@@ -21,13 +21,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -57,7 +57,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)sdk\includes\protobufs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libprotobufd.lib;d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -78,7 +78,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(ProjectDir)sdk\includes\protobufs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libprotobuf.lib;d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -119,8 +119,8 @@
     <ClInclude Include="utils\utils.hpp" />
     <ClInclude Include="valve\classes\c_cs_player_pawn.hpp" />
     <ClInclude Include="valve\classes\game_enums.hpp" />
+    <ClInclude Include="valve\classes\i_material_system.hpp" />
     <ClInclude Include="valve\interfaces\interfaces.hpp" />
-    <ClInclude Include="valve\interfaces\vtables\cs_usercmd.pb.h" />
     <ClInclude Include="valve\interfaces\vtables\c_buffer_string_growable.hpp" />
     <ClInclude Include="valve\interfaces\vtables\iswapchaindx11.h" />
     <ClInclude Include="valve\interfaces\vtables\i_csgo_input.hpp" />
@@ -137,11 +137,6 @@
     <ClInclude Include="valve\interfaces\vtables\i_resource_system.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_schema_system.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_source2_engine_to_client.h" />
-    <ClInclude Include="valve\interfaces\vtables\netmessages.pb.h" />
-    <ClInclude Include="valve\interfaces\vtables\network_connection.pb.h" />
-    <ClInclude Include="valve\interfaces\vtables\networkbasetypes.pb.h" />
-    <ClInclude Include="valve\interfaces\vtables\usercmd.pb.h" />
-    <ClInclude Include="valve\interfaces\vtables\usermessages.pb.h" />
     <ClInclude Include="valve\modules\modules.hpp" />
     <ClInclude Include="valve\schema\schema.hpp" />
   </ItemGroup>
@@ -171,16 +166,13 @@
     <ClCompile Include="sdk\includes\minhook\trampoline.c" />
     <ClCompile Include="utils\utils.cpp" />
     <ClCompile Include="valve\interfaces\interfaces.cpp" />
-    <ClCompile Include="valve\interfaces\vtables\cs_usercmd.pb.cc" />
     <ClCompile Include="valve\interfaces\vtables\c_buffer_string_growable.cpp" />
     <ClCompile Include="valve\interfaces\vtables\i_localize.cpp" />
-    <ClCompile Include="valve\interfaces\vtables\netmessages.pb.cc" />
-    <ClCompile Include="valve\interfaces\vtables\network_connection.pb.cc" />
-    <ClCompile Include="valve\interfaces\vtables\networkbasetypes.pb.cc" />
-    <ClCompile Include="valve\interfaces\vtables\usercmd.pb.cc" />
-    <ClCompile Include="valve\interfaces\vtables\usermessages.pb.cc" />
     <ClCompile Include="valve\modules\modules.cpp" />
     <ClCompile Include="valve\schema\schema.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="sdk\includes\imgui\freetype\freetype.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,7 +8,7 @@
 #include "../valve/interfaces/vtables/i_game_event.hpp"
 #include "../valve/classes/c_cs_player_pawn.hpp"
 #include "../sdk/includes/hash.hpp"
-
+#include "../valve/classes/i_material_system.hpp"
 
 using namespace hooks;
 
@@ -85,9 +85,15 @@ bool c_hooks::initialize() {
 		i_game_event::get_player_controller = reinterpret_cast<i_game_event::GetPlayerControllerFn>(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 83 EC 38 8B 02 4C 8D 44 24 20"));
 	}
 
+	//@ida #STR: "?SaveKV3AsJSON@@YA_NPEBVKeyValues3@@PEAVCUtlString@@1@Z"
 	if (g_modules->m_modules.afxhooksource2_dll.get()) {
-		fire_event_client_side::m_fire_event_client_side.hook(
-			g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 10 48 89 6C 24 20"),
+		//for original afxsource2
+		unsigned char* address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 10 48 89 6C 24 20");
+		//for wangchudi's afxsource2
+		if (!address_fire_stage)
+			address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 ? 48 89 ? 24 ? 48 89 54 24 ? 48 89 4C 24");
+
+		fire_event_client_side::m_fire_event_client_side.hook(address_fire_stage,
 			fire_event_client_side::hk_fire_event_client_side
 		);
 	}
@@ -121,6 +127,18 @@ bool c_hooks::initialize() {
 		resize_buffers::m_resize_buffers.hook(g_directx->m_resize_buffers_address, resize_buffers::hk_resize_buffers);
 	if (g_directx->m_create_swap_chain_address)
 		create_swap_chain::m_create_swap_chain.hook(g_directx->m_create_swap_chain_address, create_swap_chain::hk_create_swap_chain);
+
+	// sub_180744CF0((__int64)v115, "econ_instance_vars", (int *)&v88);
+	build_material::m_build_material.hook(
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 5C 24 ? 48 89 54 24 ? 56 57 41 54 41 55 41 57 48 83 EC 20 33 C0 C6 01 01 48 89"),
+		build_material::hk_build_material
+	);
+
+	//@ida: scenesystem.dll -> class CLightBinnerGPU -> 3 index vtable
+	draw_array_light::m_draw_array_light.hook(
+		g_opcodes->scan(g_modules->m_modules.scenesystem_dll.get_name(), "48 89 54 24 ? 55 57 41 56 48 83 EC 50 48 8B FA 48 8B E9 BA ? ? ? ?"),
+		draw_array_light::hk_draw_array_light
+	);
 
 	auto loc_1808E9E54 = g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "74 2A 48 8B 0D ? ? ? ? 48 8D 44 24 ? 48 89 7C 24 ? 4C 8D 4C 24 ? 4C 8D 45 A0 48 89 44 24 ? 48 8D 55 20");
 	if (loc_1808E9E54) {
@@ -206,6 +224,8 @@ __int64 __fastcall hooks::level_init::hk_level_init(void* rcx, void* rdx) {
 	if (g_cfg->glove_changer.m_enabled) {
 		//g_glove_changer->should_update = true;
 	}
+
+	g_world->Reset();
 
 	return original(rcx, rdx);
 }
@@ -321,4 +341,79 @@ HRESULT __stdcall hooks::create_swap_chain::hk_create_swap_chain(IDXGIFactory* f
 
 	g_directx->destroy_render_target();
 	return original(factory, device, desc, swap_chain);
+}
+
+//https://www.unknowncheats.me/forum/counter-strike-2-a/754206-custom-paintkit-colors.html
+void* __fastcall hooks::build_material::hk_build_material(void* rcx, void* weapon, void* vector)
+{
+	auto original = m_build_material.get_original<decltype(&hk_build_material)>();
+
+	g_changer->on_build_material_hook(vector, *reinterpret_cast<c_econ_item_view**>((uintptr_t)rcx - 0x38));
+
+	return original(rcx, weapon, vector);
+}
+
+void __fastcall hooks::draw_array_light::hk_draw_array_light(CLightBinnerGpu* pLightBinnerGPU, CAggregateSceneObject* pAggregateSceneObject, CSceneObjectInfo* a3)
+{
+	auto original = m_draw_array_light.get_original<decltype(&hk_draw_array_light)>();
+	//Change Light Color
+	if (g_cfg->visuals.m_change_color_light)
+	{
+
+		if (g_world->m_light_color.is_zero())
+		{
+			g_world->m_light_color = pAggregateSceneObject->m_cLightColor;
+		}
+
+		vec3_t LColor;
+		LColor.x = (g_cfg->visuals.m_color_light[0]) * (g_cfg->visuals.m_color_light[3]);
+		LColor.y = (g_cfg->visuals.m_color_light[1]) * (g_cfg->visuals.m_color_light[3]);
+		LColor.z = (g_cfg->visuals.m_color_light[2]) * (g_cfg->visuals.m_color_light[3]);
+
+		pAggregateSceneObject->m_cLightColor = LColor;
+
+	}
+	else
+	{
+		if (!g_world->m_light_color.is_zero() && g_world->CheckVectors(pAggregateSceneObject->m_cLightColor, g_world->m_light_color))
+		{
+			pAggregateSceneObject->m_cLightColor = g_world->m_light_color;
+		}
+	}
+	//Change Light Direction
+	if (g_cfg->visuals.m_change_shadow_dir)
+	{
+		if (g_world->m_shadow_dir.is_zero())
+		{
+			g_world->m_shadow_dir = a3->m_pScene->m_pSceneLightObject->m_vDirectionNormalized;
+		}
+
+		vec3_t ShadowDir =
+		{
+			g_cfg->visuals.m_shadow_pitch,
+			g_cfg->visuals.m_shadow_yaw,
+			g_cfg->visuals.m_shadow_roll
+		};
+
+		ShadowDir.normalize_in_place();
+
+		if (CSceneLightObject* pLightObject = a3->m_pScene->m_pSceneLightObject)
+		{
+			if (g_world->m_shadow_dir.is_zero())
+			{
+				g_world->m_shadow_dir = pLightObject->m_vDirectionNormalized;
+			}
+
+			pLightObject->m_vDirectionNormalized = ShadowDir;
+		}
+	}
+	else
+	{
+		if (!g_world->m_shadow_dir.is_zero() && g_world->CheckVectors(a3->m_pScene->m_pSceneLightObject->m_vDirectionNormalized, g_world->m_shadow_dir))
+		{
+			a3->m_pScene->m_pSceneLightObject->m_vDirectionNormalized = g_world->m_shadow_dir;
+		}
+	}
+
+	original(pLightBinnerGPU, pAggregateSceneObject, a3);
 }

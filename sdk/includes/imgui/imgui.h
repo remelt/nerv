@@ -528,6 +528,7 @@ namespace ImGui
     IMGUI_API bool          Combo(const char* label, int* current_item, bool(*items_getter)(void* data, int idx, const char** out_text), void* data, int items_count, int popup_max_height_in_items = -1);
 
     IMGUI_API void          MultiCombo( const char* label, bool combos[], const char* items[], int items_count );
+    IMGUI_API bool          MultiCombo(const char* name, const char** displayName, bool* data, int dataSize);
     // Widgets: Drag Sliders
     // - CTRL+Click on any drag box to turn them into an input box. Manually input values aren't clamped by default and can go off-bounds. Use ImGuiSliderFlags_AlwaysClamp to always clamp.
     // - For all the Float2/Float3/Float4/Int2/Int3/Int4 versions of every function, note that a 'float v[X]' function argument is the same as 'float* v',

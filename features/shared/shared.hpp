@@ -11,6 +11,7 @@
 class c_changer {
 public:
 	void run();
+	void on_build_material_hook(void* vector, c_econ_item_view* m_item);
 };
 
 inline const auto g_changer = std::make_unique<c_changer>();

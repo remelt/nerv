@@ -18,6 +18,7 @@ void c_modules::modules_t::initialize() {
 	REQUIRE(panorama_dll,		"panorama.dll");
 	REQUIRE(resourcesystem_dll,	"resourcesystem.dll");
 	REQUIRE(rendersystem_dll,	"rendersystemdx11.dll");
+	REQUIRE(scenesystem_dll,	"scenesystem.dll");
 	afxhooksource2_dll = c_dll(xorstr_("afxhooksource2.dll"));
 	localize_dll = c_dll(xorstr_("localize.dll"));
 	if (!localize_dll.get())

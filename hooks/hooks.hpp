@@ -1,5 +1,10 @@
 #pragma once
 
+class CLightBinnerGpu;
+class CAggregateSceneObject;
+class CSceneObjectInfo;
+
+
 class c_hook {
 	void* m_function = nullptr;
 	void* m_detour = nullptr;
@@ -105,6 +110,18 @@ namespace hooks {
 	namespace create_swap_chain {
 		inline c_hook m_create_swap_chain;
 		HRESULT __stdcall hk_create_swap_chain(IDXGIFactory* factory, IUnknown* device, DXGI_SWAP_CHAIN_DESC* desc, IDXGISwapChain** swap_chain);
+	}
+
+	namespace build_material
+	{
+		inline c_hook m_build_material;
+		void* __fastcall hk_build_material(void* rcx, void* weapon, void* vector);
+	}
+
+	namespace draw_array_light
+	{
+		inline c_hook m_draw_array_light;
+		void __fastcall hk_draw_array_light(CLightBinnerGpu* pLightBinnerGPU, CAggregateSceneObject* pAggregateSceneObject, CSceneObjectInfo* a3);
 	}
 
 }

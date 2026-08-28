@@ -123,6 +123,17 @@ enum HitGroup_t : int {
 	HITGROUP_GEAR = 10
 };
 
+enum { LOOSE_VAR_COLOR4 = 9 };
+
+struct CompositeMaterialInputLooseVariable_t {
+	char* m_strName;                 // CUtlString
+	uint8_t  pad_008[0x38];
+	int32_t  m_nVariableType;
+	uint8_t  pad_044[0x48];
+	uint32_t m_cValueColor4;            // rgba
+	uint8_t  pad_090[0x288 - 0x90];
+};
+
 class c_entity_identity {
 public:
 	SCHEMA(m_name, const char*, "CEntityIdentity", "m_name");
@@ -257,9 +268,15 @@ public:
 	}
 };
 
+class CUtlString
+{
+public:
+	const char* m_pString;
+};
+
 class c_model {
 public:
-	c_hitbox_set* get_hitbox_set() {
+	/*c_hitbox_set* get_hitbox_set() {
 
 		uintptr_t render_meshs_ptr = *reinterpret_cast<uintptr_t*>(reinterpret_cast<uintptr_t>(this) + 0x78);
 		if (!render_meshs_ptr)
@@ -317,8 +334,11 @@ public:
 			return -1;
 
 		return static_cast<int32_t>(parent_array[index]);
-	}
+	}*/
 
+
+	char pad_0080[248]; //0x0080
+	c_network_utl_vector<CUtlString> m_MeshGroups; //0x00F8
 };
 
 template<typename T>
@@ -337,10 +357,11 @@ public:
 	}
 };
 
+
 class c_model_state {
 public:
 	SCHEMA(m_model, c_strong_handle<c_model>, "CModelState", "m_hModel");
-	SCHEMA(m_ModelName, void*, "CModelState", "m_ModelName"); // CUtlSymbolLarge
+	SCHEMA(m_ModelName, CUtlString, "CModelState", "m_ModelName"); // CUtlSymbolLarge
 	SCHEMA(m_MeshGroupMask, uint64_t, "CModelState", "m_MeshGroupMask");
 	OFFSET(c_bone_data*, get_bone_data, 0x80);
 
@@ -384,7 +405,7 @@ public:
 	SCHEMA(m_abs_origin, vec3_t, "CGameSceneNode", "m_vecAbsOrigin");
 
 	c_skeleton_instance* get_skeleton_instance() {
-		return vmt::call_virtual<c_skeleton_instance*>(this, 9);
+		return vmt::call_virtual<c_skeleton_instance*>(this, 13);
 	}
 
 	void set_mesh_group_mask(uint64_t mask) {
@@ -731,20 +752,6 @@ public:
 	SCHEMA(m_max_speed, float, "CPlayer_MovementServices", "m_flMaxspeed");
 	SCHEMA(m_surface_friction, float, "CPlayer_MovementServices_Humanoid", "m_flSurfaceFriction");
 
-	using set_pred_cmd_fn = void(__fastcall*)(void*, c_user_cmd*);
-	using reset_pred_cmd_fn = void(__fastcall*)(void*);
-
-	void set_prediction_command(c_user_cmd* user_cmd) {
-		auto** vt = *reinterpret_cast<void***>(this);
-		auto fn = reinterpret_cast<set_pred_cmd_fn>(vt[43]);
-		fn(this, user_cmd);
-	}
-
-	void reset_prediction_command() {
-		auto** vt = *reinterpret_cast<void***>(this);
-		auto fn = reinterpret_cast<reset_pred_cmd_fn>(vt[44]);
-		fn(this);
-	}
 };
 
 class c_cs_player_modern_jump {
