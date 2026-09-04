@@ -81,6 +81,7 @@ public:
 	{
 		bool m_enable_smoke = false;
 		bool m_enable_draw_flashbang = false;
+		bool m_enable_draw_legs = false;
 
 		bool m_change_shadow_dir = false;
 		float m_shadow_pitch = 0.f;
@@ -89,7 +90,6 @@ public:
 
 		bool m_change_color_light = false;
 		float m_color_light[4] = { 1.f, 1.f, 1.f, 1.f };
-
 
 	} visuals;
 

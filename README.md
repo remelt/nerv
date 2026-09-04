@@ -11,8 +11,8 @@ Original Source : [click](https://www.unknowncheats.me/forum/counter-strike-2-re
 + **THIRDPERSON KNIFE ANIMATIONS WORK ONLY WITH TRUEVIEW ON**
 + **skins update only manually after rewinding the demo**
 + **gloves skins can bug forever (issue with: glove_changer.cpp -> glove_item->construct_paint_kit())**
-+ **knife skins are set as default after loading cfg**  
-+ **agents doesnt update properly (semi-fixed) : [click](https://github.com/remelt/nerv/issues/2)**
++ **knife skins are set as default after loading cfg**
++ **need to add color save to cfg system**  
 
 **s/o**  
 [flowars](https://github.com/flowars) for doing most of the stuff

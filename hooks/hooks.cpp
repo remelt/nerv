@@ -120,6 +120,11 @@ bool c_hooks::initialize() {
 		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "85 D2 0F 88 ?? ?? ?? ?? 48 89 4C 24 ?? 55 56 41 55 41 56 41 57 48 8D AC 24"),
 		draw_flashbang_overlay::hk_draw_flashbang_overlay
 	);
+	// #STR: "FirstpersonLegsPass1", "FirstpersonLegsPass2", "CsgoForward", "Firstperson Legs", "FirstpersonLegsPrepass"
+	firstperson_legs_prepass::m_firstperson_legs_prepass.hook(
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "40 55 53 56 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? F2 0F 10 42"),
+		firstperson_legs_prepass::hk_firstperson_legs_prepass
+	);
 
 	if (g_directx->m_present_address)
 		present::m_present.hook(g_directx->m_present_address, present::hk_present);
@@ -309,6 +314,16 @@ void __fastcall hooks::draw_flashbang_overlay::hk_draw_flashbang_overlay(void* a
 	original(a1, a2, a3, a4, a5);
 }
 
+void __fastcall hooks::firstperson_legs_prepass::hk_firstperson_legs_prepass(void* a1, void* a2, void* a3, void* a4, void* a5)
+{
+	auto original = m_firstperson_legs_prepass.get_original<decltype(&hk_firstperson_legs_prepass)>();
+
+	if (g_cfg->visuals.m_enable_draw_legs)
+		return;
+
+	original(a1, a2, a3, a4, a5);
+}
+
 HRESULT hooks::present::hk_present(IDXGISwapChain* swap_chain, unsigned int sync_interval, unsigned int flags) {
 	auto original = m_present.get_original<decltype(&hk_present)>();
 
@@ -356,6 +371,7 @@ void* __fastcall hooks::build_material::hk_build_material(void* rcx, void* weapo
 void __fastcall hooks::draw_array_light::hk_draw_array_light(CLightBinnerGpu* pLightBinnerGPU, CAggregateSceneObject* pAggregateSceneObject, CSceneObjectInfo* a3)
 {
 	auto original = m_draw_array_light.get_original<decltype(&hk_draw_array_light)>();
+
 	//Change Light Color
 	if (g_cfg->visuals.m_change_color_light)
 	{

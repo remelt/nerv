@@ -49,9 +49,9 @@ CImageProxySource* c_item_schema::get_skin_image(const std::string& simple_name,
 
 	if (image == nullptr)
 		if (paint_kit_name)
-			LOG_ERROR(u8"Image for '%s | %s' is nullptr", simple_name, paint_kit_name);
+			LOG_ERROR(u8"Image for '%s | %s' is nullptr", simple_name.c_str(), paint_kit_name);
 		else
-			LOG_ERROR(u8"Image for '%s' is nullptr", simple_name);
+			LOG_ERROR(u8"Image for '%s' is nullptr", simple_name.c_str());
 
 	return image;
 }

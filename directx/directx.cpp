@@ -149,7 +149,6 @@ void c_directx::uninitialize() {
 	m_window = nullptr;
 	m_started = false;
 	m_initial_cursor_synced = false;
-	m_last_dpi_scale = 0.0f;
 }
 
 void c_directx::create_render_target() {
@@ -182,16 +181,17 @@ void c_directx::update_dpi_scale() {
 		return;
 
 	int height = rect.bottom - rect.top;
+
+	float scale;
 	if (height <= 0)
-		return;
+		scale = 1.f;
+	else
+		scale = height / 1080.0f;
 
-	float scale = height / 1080.0f;
-	if (scale < 0.5f) scale = 0.5f;
-	if (scale > 4.0f) scale = 4.0f;
+	scale = std::clamp(scale, 0.5f, 4.f);
 
-	if (std::abs(scale - m_last_dpi_scale) > 0.01f) {
+	if (std::abs(scale - g_menu->get_dpi_scale()) > 0.01f) {
 		g_menu->rebuild_fonts(scale);
-		m_last_dpi_scale = scale;
 	}
 }
 
@@ -219,25 +219,6 @@ void c_directx::start_frame(IDXGISwapChain* swap_chain)
 		io.ImeWindowHandle = m_window;
 
 		m_imgui_initialized = true;
-
-		RECT rect;
-		int screen_h = 0;
-		if (GetClientRect(m_window, &rect))
-			screen_h = rect.bottom - rect.top;
-
-		if (screen_h > 0)
-		{
-			float scale = screen_h / 1080.0f;
-			if (scale < 0.5f) scale = 0.5f;
-			if (scale > 4.0f) scale = 4.0f;
-			g_menu->rebuild_fonts(scale);
-			m_last_dpi_scale = scale;
-		}
-		else
-		{
-			m_last_dpi_scale = 1.0f;
-		}
-
 		m_started = true;
 	}
 
@@ -247,9 +228,6 @@ void c_directx::start_frame(IDXGISwapChain* swap_chain)
 void c_directx::new_frame() {
 	if (!m_imgui_initialized)
 		return;
-
-	m_mouse_scale_x = 1.0f;
-	m_mouse_scale_y = 1.0f;
 
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();

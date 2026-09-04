@@ -53,6 +53,7 @@ uintptr_t __stdcall start_address(const HMODULE h_module)
             Sleep(100);
         }
 
+        g_config_system->reset();
         destroy(h_module);
 #endif
     }

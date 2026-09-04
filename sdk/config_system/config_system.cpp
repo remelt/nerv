@@ -37,15 +37,21 @@ void c_config_system::setup_values() {
     push_item(&g_cfg->knife_changer.m_wear, "knife_changer", "wear", 0.0001f);
     push_item(&g_cfg->knife_changer.m_seed, "knife_changer", "seed", 0);
     push_char_array(g_cfg->knife_changer.m_custom_name, sizeof(g_cfg->knife_changer.m_custom_name), "knife_changer", "custom_name");
+    push_item(&g_cfg->knife_changer.m_custom_color, "knife_changer", "custom_color", false);
 
     push_item(&g_cfg->glove_changer.m_enabled, "glove_changer", "enabled", false);
     push_item(&g_cfg->glove_changer.m_glove, "glove_changer", "glove", 0);
     push_item(&g_cfg->glove_changer.m_paint_kit, "glove_changer", "paint_kit", 0);
     push_item(&g_cfg->glove_changer.m_wear, "glove_changer", "wear", 0.0001f);
     push_item(&g_cfg->glove_changer.m_seed, "glove_changer", "seed", 0);
+    push_item(&g_cfg->glove_changer.m_custom_color, "glove_changer", "custom_color", false);
 
     push_item(&g_cfg->agent_changer.m_enabled, "agent_changer", "enabled", false);
     push_item(&g_cfg->agent_changer.m_agent, "agent_changer", "agent", 0);
+
+    push_item(&g_cfg->custom_model.m_enabled, "custom_model", "enabled", false);
+    push_item(&g_cfg->custom_model.m_should_update, "custom_model", "should_update", false);
+    push_item(&g_cfg->custom_model.m_model_path, "custom_model", "model_path", "agents/models/tm_phoenix/tm_phoenix.vmdl");
 
     push_item(&g_cfg->skin_changer.m_enabled, "skin_changer", "enabled", false);
     push_item(&g_cfg->skin_changer.m_selected_weapon, "skin_changer", "selected_weapon", 0);
@@ -56,10 +62,20 @@ void c_config_system::setup_values() {
         push_item(&g_cfg->skin_changer.weapon_skins[i].wear, "skin_changer", prefix + "_wear", 0.0001f);
         push_item(&g_cfg->skin_changer.weapon_skins[i].seed, "skin_changer", prefix + "_seed", 0);
         push_char_array(g_cfg->skin_changer.weapon_skins[i].custom_name, sizeof(g_cfg->skin_changer.weapon_skins[i].custom_name), "skin_changer", prefix + "_custom_name");
+        push_item(&g_cfg->skin_changer.weapon_skins[i].m_custom_color, "skin_changer", prefix + "_custom_color", false);
     }
 
     push_item(&g_cfg->visuals.m_enable_smoke, "visuals", "remove_smoke", false);
     push_item(&g_cfg->visuals.m_enable_draw_flashbang, "visuals", "remove_flash", false);
+
+    push_item(&g_cfg->visuals.m_enable_draw_legs, "visuals", "draw_legs", false);
+    push_item(&g_cfg->visuals.m_change_shadow_dir, "visuals", "change_shadow_dir", false);
+    push_item(&g_cfg->visuals.m_shadow_pitch, "visuals", "shadow_pitch", 0.f);
+    push_item(&g_cfg->visuals.m_shadow_yaw, "visuals", "shadow_yaw", 0.f);
+    push_item(&g_cfg->visuals.m_shadow_roll, "visuals", "shadow_roll", 0.f);
+    push_item(&g_cfg->visuals.m_change_color_light, "visuals", "change_color_light", false);
+
+    push_item(&g_cfg->misc.m_menu_key, "misc", "menu_key", 0x2D);
 
     refresh();
 }

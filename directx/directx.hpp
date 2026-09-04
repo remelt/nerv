@@ -17,9 +17,6 @@ class c_directx {
 	bool m_started = false;
 	bool m_imgui_initialized = false;
 	bool m_initial_cursor_synced = false;
-	float m_last_dpi_scale = 0.0f;
-	float m_mouse_scale_x = 1.0f;
-	float m_mouse_scale_y = 1.0f;
 
 public:
 	void* m_present_address = nullptr;
@@ -43,8 +40,6 @@ public:
 	ID3D11Device* get_device() const { return m_device; }
 	HWND get_window() const { return m_window; }
 	bool get_imgui_init_status() const { return m_imgui_initialized; }
-	float get_mouse_scale_x() const { return m_mouse_scale_x; }
-	float get_mouse_scale_y() const { return m_mouse_scale_y; }
 };
 
 inline const auto g_directx = std::make_unique<c_directx>();

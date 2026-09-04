@@ -91,6 +91,29 @@ void process_knife_color(const uint16_t& def_index, std::vector<uint32_t>& buffe
 	};
 }
 
+void get_color(std::vector<uint32_t>& buffer) {
+	// ...
+}
+
+void set_color(void* vector, const std::vector<uint32_t>& buffer) {
+
+	for (int i = 0; i < 4; i++)
+	{
+		char name[16];
+		snprintf(name, sizeof(name), "g_vColor%d", i);
+
+		CompositeMaterialInputLooseVariable_t v{};
+		v.m_strName = tier0_dup(name);
+		v.m_nVariableType = LOOSE_VAR_COLOR4;
+		v.m_cValueColor4 = buffer[i];
+
+		//v125 = sub_180BF5380(v170, "g_nRandomSeed", v124);
+		//g_append(&v136, v125);							<--
+		static auto g_append = reinterpret_cast<void(__fastcall*)(void*, const CompositeMaterialInputLooseVariable_t*)>(g_opcodes->get_absolute_address(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "E8 ? ? ? ? 0F 28 B4 24 ? ? ? ? 4C 39 A5"), 0x1));
+		g_append(vector, &v);
+	}
+}
+
 void c_changer::on_build_material_hook(void* vector, c_econ_item_view* m_item)
 {
 	if (!m_item)
@@ -109,19 +132,5 @@ void c_changer::on_build_material_hook(void* vector, c_econ_item_view* m_item)
 	if (buffer.empty())
 		return;
 
-	for (int i = 0; i < 4; i++)
-	{
-		char name[16];
-		snprintf(name, sizeof(name), "g_vColor%d", i);
-
-		CompositeMaterialInputLooseVariable_t v{};
-		v.m_strName = tier0_dup(name);
-		v.m_nVariableType = LOOSE_VAR_COLOR4;
-		v.m_cValueColor4 = buffer[i];
-
-		//v125 = sub_180BF5380(v170, "g_nRandomSeed", v124);
-		//g_append(&v136, v125);							<--
-		static auto g_append = reinterpret_cast<void(__fastcall*)(void*, const CompositeMaterialInputLooseVariable_t*)>(g_opcodes->get_absolute_address(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "E8 ? ? ? ? 0F 28 B4 24 ? ? ? ? 4C 39 A5"), 0x1));
-		g_append(vector, &v);
-	}
+	set_color(vector, buffer);
 }

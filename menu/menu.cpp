@@ -196,13 +196,17 @@ void get_loading_progress() {
 
 void draw_skins_combo(const char* combo_label, ImGuiTextFilter& filter, const char* filter_label, const uint16_t& selected_def_index, int& paint_kit, bool render_preview = true) {
 	auto& kits = g_item_schema->item_paint_kits[selected_def_index];
-	if (kits.empty())
+	if (kits.empty()) {
+		paint_kit = 0;
 		return;
+	}
+
+	paint_kit = std::clamp(paint_kit, 0, (int)kits.size() - 1);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	filter.Draw(filter_label); ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ style.FramePadding.x, style.ItemSpacing.y }); ImGui::SameLine(); ImGui::Text(("Search")); ImGui::PopStyleVar();
 
-	const char* preview_value = (paint_kit < (int)kits.size()) ? kits[paint_kit].name.c_str() : "";
+	const char* preview_value = kits[paint_kit].name.c_str();
 
 	if (!ImGui::BeginCombo(combo_label, preview_value))
 		return;
@@ -228,12 +232,12 @@ void draw_skins_combo(const char* combo_label, ImGuiTextFilter& filter, const ch
 			ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(p_min.x + padding, p_min.y + padding), ImVec2(p_min.x + padding2, p_max.y - padding), kit_color);
 			
 			if (ImGui::IsItemHovered() && kits[i].image != nullptr && render_preview) {
-				const static float spacing = style.ItemSpacing.x;
+				const float spacing = style.ItemSpacing.x;
 				const static float rounding = 0.f;
 
 				const ImVec2 image_size_raw = kits[i].image->GetImageSize();
 				//const ImVec2 image_size_raw {512, 384};
-				if (image_size_raw.x != 0 && image_size_raw.y != 0) {
+				if (kits[i].image->GetNativeTexture() != nullptr && image_size_raw.x != 0 && image_size_raw.y != 0) {
 
 					const ImVec2 window_position = ImGui::GetWindowPos();
 					const ImVec2 window_size = ImGui::GetWindowSize();
@@ -270,13 +274,13 @@ static void draw_skins_tab() {
 		const bool is_parsed = g_item_schema->is_initialized() && !g_item_schema->knife_names_cstr.empty();
 
 		if (is_parsed) {
+			g_cfg->knife_changer.m_knife = std::clamp(g_cfg->knife_changer.m_knife, 0, (int)g_item_schema->knife_names_cstr.size() - 1);
+
 			ImGui::Combo("Knife Model", &g_cfg->knife_changer.m_knife,
 				g_item_schema->knife_names_cstr.data(),
 				(int)g_item_schema->knife_names_cstr.size());
 
-			if (g_cfg->knife_changer.m_knife < (int)g_item_schema->knives.size()) {
-				selected_knife = g_item_schema->knives[g_cfg->knife_changer.m_knife].definition_index;
-			}
+			selected_knife = g_item_schema->knives[g_cfg->knife_changer.m_knife].definition_index;
 
 			if (last_knife != g_cfg->knife_changer.m_knife) {
 				g_cfg->knife_changer.m_paint_kit = 0;
@@ -294,7 +298,7 @@ static void draw_skins_tab() {
 					float item_width = ImGui::CalcItemWidth();
 					float half_width = (item_width - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-					const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().FramePadding.x * 2;
+					const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().ScrollbarSize;
 
 					ImGui::SetNextItemWidth(half_width);
 					if (ImGui::SliderFloat("##Wear", &temp_wear, 0.0f, 1.0f, "%.4f")) {
@@ -312,13 +316,13 @@ static void draw_skins_tab() {
 					ImGui::Checkbox("Enable Custom Color##Knife", &g_cfg->knife_changer.m_custom_color);
 					if (g_cfg->knife_changer.m_custom_color)
 					{
-						ImGui::SameLine(group_w - 20);
+						ImGui::SameLine(group_w - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.x);
 						ImGui::ColorEdit4(("##modulate1knife"), g_cfg->knife_changer.m_color1, no_alpha);
-						ImGui::SameLine(group_w - 40);
+						ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 2);
 						ImGui::ColorEdit4(("##modulate2knife"), g_cfg->knife_changer.m_color2, no_alpha);
-						ImGui::SameLine(group_w - 60);
+						ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 3);
 						ImGui::ColorEdit4(("##modulate3knife"), g_cfg->knife_changer.m_color3, no_alpha);
-						ImGui::SameLine(group_w - 80);
+						ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 4);
 						ImGui::ColorEdit4(("##modulate4knife"), g_cfg->knife_changer.m_color4, no_alpha);
 					}
 				}
@@ -342,13 +346,13 @@ static void draw_skins_tab() {
 		const bool is_parsed = g_item_schema->is_initialized() && !g_item_schema->glove_names_cstr.empty();
 
 		if (is_parsed) {
+			g_cfg->glove_changer.m_glove = std::clamp(g_cfg->glove_changer.m_glove, 0, (int)g_item_schema->glove_names_cstr.size() - 1);
+
 			ImGui::Combo("Glove Model", &g_cfg->glove_changer.m_glove,
 				g_item_schema->glove_names_cstr.data(),
 				(int)g_item_schema->glove_names_cstr.size());
 
-			if (g_cfg->glove_changer.m_glove < (int)g_item_schema->gloves.size()) {
-				selected_glove = g_item_schema->gloves[g_cfg->glove_changer.m_glove].definition_index;
-			}
+			selected_glove = g_item_schema->gloves[g_cfg->glove_changer.m_glove].definition_index;
 
 			if (last_glove != g_cfg->glove_changer.m_glove) {
 				auto& glove_skins = g_item_schema->get_paint_kit_names_for_item(selected_glove);
@@ -363,7 +367,7 @@ static void draw_skins_tab() {
 				float glove_item_width = ImGui::CalcItemWidth();
 				float glove_half_width = (glove_item_width - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-				const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().FramePadding.x * 2;
+				const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().ScrollbarSize;
 
 				ImGui::SetNextItemWidth(glove_half_width);
 				if (ImGui::SliderFloat("##GloveWear", &temp_glove_wear, 0.0f, 1.0f, "%.4f")) {
@@ -376,18 +380,18 @@ static void draw_skins_tab() {
 				ImGui::SetNextItemWidth(glove_half_width);
 				ImGui::InputInt("Wear / Seed##glove", &g_cfg->glove_changer.m_seed, 0, 0);
 
-				ImGui::Checkbox("Enable Custom Color##Glove", &g_cfg->glove_changer.m_custom_color);
-				if (g_cfg->glove_changer.m_custom_color)
-				{
-					ImGui::SameLine(group_w - 20);
-					ImGui::ColorEdit4(("##modulate1glove"), g_cfg->glove_changer.m_color1, no_alpha);
-					ImGui::SameLine(group_w - 40);
-					ImGui::ColorEdit4(("##modulate2glove"), g_cfg->glove_changer.m_color2, no_alpha);
-					ImGui::SameLine(group_w - 60);
-					ImGui::ColorEdit4(("##modulate3glove"), g_cfg->glove_changer.m_color3, no_alpha);
-					ImGui::SameLine(group_w - 80);
-					ImGui::ColorEdit4(("##modulate4glove"), g_cfg->glove_changer.m_color4, no_alpha);
-				}
+				//ImGui::Checkbox("Enable Custom Color##Glove", &g_cfg->glove_changer.m_custom_color);
+				//if (g_cfg->glove_changer.m_custom_color)
+				//{
+				//	ImGui::SameLine(group_w - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.x);
+				//	ImGui::ColorEdit4(("##modulate1glove"), g_cfg->glove_changer.m_color1, no_alpha);
+				//	ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 2);
+				//	ImGui::ColorEdit4(("##modulate2glove"), g_cfg->glove_changer.m_color2, no_alpha);
+				//	ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 3);
+				//	ImGui::ColorEdit4(("##modulate3glove"), g_cfg->glove_changer.m_color3, no_alpha);
+				//	ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 4);
+				//	ImGui::ColorEdit4(("##modulate4glove"), g_cfg->glove_changer.m_color4, no_alpha);
+				//}
 			}
 			if (ImGui::Button("Apply Gloves##gloves_apply")) {
 				g_glove_changer->should_update = true;
@@ -409,18 +413,17 @@ static void draw_skins_tab() {
 		const bool is_parsed = g_item_schema->is_initialized() && !g_item_schema->weapon_names_cstr.empty();
 
 		if (is_parsed) {
+			g_cfg->skin_changer.m_selected_weapon = std::clamp(g_cfg->skin_changer.m_selected_weapon, 0, (int)g_item_schema->weapon_names_cstr.size() - 1);
+
 			ImGui::Combo("Weapon", &g_cfg->skin_changer.m_selected_weapon,
 				g_item_schema->weapon_names_cstr.data(),
 				(int)g_item_schema->weapon_names_cstr.size());
 
-			if (g_cfg->skin_changer.m_selected_weapon < (int)g_item_schema->weapons.size()) {
-				selected_weapon_def = g_item_schema->weapons[g_cfg->skin_changer.m_selected_weapon].definition_index;
-			}
+			selected_weapon_def = g_item_schema->weapons[g_cfg->skin_changer.m_selected_weapon].definition_index;
 
 			if (selected_weapon_def) {
 				int config_index = c_config::skin_changer_t::get_config_index(selected_weapon_def);
 				auto& weapon_skin = g_cfg->skin_changer.weapon_skins[config_index];
-
 
 				draw_skins_combo("Skin##weapon_skin", filter, "##FilterSkins", selected_weapon_def, weapon_skin.paint_kit);
 
@@ -428,7 +431,7 @@ static void draw_skins_tab() {
 					float weapon_item_width = ImGui::CalcItemWidth();
 					float weapon_half_width = (weapon_item_width - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-					const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().FramePadding.x * 2;
+					const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().ScrollbarSize;
 
 					ImGui::SetNextItemWidth(weapon_half_width);
 					ImGui::SliderFloat("##WeaponWear", &weapon_skin.wear, 0.0f, 1.0f, "%.4f");
@@ -441,13 +444,13 @@ static void draw_skins_tab() {
 					ImGui::Checkbox("Enable Custom Color##Skin", &weapon_skin.m_custom_color);
 					if (weapon_skin.m_custom_color)
 					{
-						ImGui::SameLine(group_w - 20);
+						ImGui::SameLine(group_w - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.x);
 						ImGui::ColorEdit4(("##modulate1skin"), weapon_skin.m_color1, no_alpha);
-						ImGui::SameLine(group_w - 40);
+						ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 2);
 						ImGui::ColorEdit4(("##modulate2skin"), weapon_skin.m_color2, no_alpha);
-						ImGui::SameLine(group_w - 60);
+						ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 3);
 						ImGui::ColorEdit4(("##modulate3skin"), weapon_skin.m_color3, no_alpha);
-						ImGui::SameLine(group_w - 80);
+						ImGui::SameLine(group_w - (ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x) * 4);
 						ImGui::ColorEdit4(("##modulate4skin"), weapon_skin.m_color4, no_alpha);
 					}
 				}
@@ -474,7 +477,8 @@ static void draw_skins_tab() {
 			ImGuiStyle& style = ImGui::GetStyle();
 			filter.Draw("##FilterAgents"); ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ style.FramePadding.x, style.ItemSpacing.y }); ImGui::SameLine(); ImGui::Text(("Search")); ImGui::PopStyleVar();
 
-			const char* preview_value = (g_cfg->agent_changer.m_agent < (int)g_item_schema->agent_names_cstr.size()) ? g_item_schema->agent_names_cstr[g_cfg->agent_changer.m_agent] : "";
+			g_cfg->agent_changer.m_agent = std::clamp(g_cfg->agent_changer.m_agent, 0, (int)g_item_schema->agent_names_cstr.size() - 1);
+			const char* preview_value = g_item_schema->agent_names_cstr[g_cfg->agent_changer.m_agent];
 
 			if (ImGui::BeginCombo("Agent Model", preview_value)) {
 				for (int i = 0; i < (int)g_item_schema->agent_names_cstr.size(); i++) {
@@ -490,12 +494,12 @@ static void draw_skins_tab() {
 						// agent image l8r
 
 						if (ImGui::IsItemHovered() && g_item_schema->agents[i].image != nullptr) {
-							const static float spacing = style.ItemSpacing.x;
+							const float spacing = style.ItemSpacing.x;
 							const static float rounding = 0.f;
 
 							const ImVec2 image_size_raw = g_item_schema->agents[i].image->GetImageSize();
 							//const ImVec2 image_size_raw {512, 384};
-							if (image_size_raw.x != 0 && image_size_raw.y != 0) {
+							if (g_item_schema->agents[i].image->GetNativeTexture() != nullptr && image_size_raw.x != 0 && image_size_raw.y != 0) {
 
 								const ImVec2 window_position = ImGui::GetWindowPos();
 								const ImVec2 window_size = ImGui::GetWindowSize();
@@ -612,13 +616,12 @@ static void draw_config_tab(float scale) {
 
 static void draw_visauls_tab()
 {
-	const float group_w = ImGui::GetCurrentWindow()->Size.x - ImGui::GetStyle().FramePadding.x * 2;
-
 	ImGui::Text("Visuals");
 	ImGui::Separator();
 
 	ImGui::Checkbox("Remove Smoke", &g_cfg->visuals.m_enable_smoke);
 	ImGui::Checkbox("Remove Flash", &g_cfg->visuals.m_enable_draw_flashbang);
+	ImGui::Checkbox("Remove Legs", &g_cfg->visuals.m_enable_draw_legs);
 
 	ImGui::Text("World");
 	ImGui::Separator();
@@ -636,7 +639,7 @@ static void draw_visauls_tab()
 	ImGui::EndDisabled();
 
 	ImGui::Checkbox("Change Light Color##lightcolor", &g_cfg->visuals.m_change_color_light);
-	if(g_cfg->visuals.m_change_color_light)
+	if (g_cfg->visuals.m_change_color_light)
 	{
 		ImGui::SameLine(); ImGui::ColorEdit4("##LightColor", g_cfg->visuals.m_color_light, with_alpha);
 	}
@@ -667,10 +670,10 @@ void c_menu::draw() {
 
 	setup_style();
 
-	float scale = m_dpi_scale;
-	ImVec2 window_size(m_main_window_size.x * scale, m_main_window_size.y * scale);
+	const float scale = m_dpi_scale;
+	const ImVec2 window_size(m_main_window_size.x * scale, m_main_window_size.y * scale);
 
-	ImGui::SetNextWindowSize(window_size, ImGuiCond_Once);
+	ImGui::SetNextWindowSize(window_size);
 	ImGui::Begin("Nerv", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
 	m_main_window_pos = ImGui::GetWindowPos();

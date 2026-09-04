@@ -97,6 +97,11 @@ namespace hooks {
 		void __fastcall hk_draw_flashbang_overlay(void* a1, int a2, __int64* a3, __int64 a4, __m128* a5);
 	}
 
+	namespace firstperson_legs_prepass {
+		inline c_hook m_firstperson_legs_prepass;
+		void __fastcall hk_firstperson_legs_prepass(void* a1, void* a2, void* a3, void* a4, void* a5);
+	}
+
 	namespace present {
 		inline c_hook m_present;
 		HRESULT hk_present(IDXGISwapChain* swap_chain, unsigned int sync_interval, unsigned int flags);

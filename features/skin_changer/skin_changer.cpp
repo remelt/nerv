@@ -131,7 +131,7 @@ void c_skin_changer::process_knife(c_econ_entity* weapon, c_econ_item_view* item
 
 	const uint16_t def_index = item->m_definition_index();
 	const uint16_t selected_knife = g_item_schema->knives[g_cfg->knife_changer.m_knife].definition_index;
-	if (selected_knife == 0)
+	if (selected_knife == 0 || g_cfg->knife_changer.m_knife == 0)
 		return;
 
 	int paint_kit_id = g_item_schema->get_paint_kit_id_for_item(selected_knife, g_cfg->knife_changer.m_paint_kit);
