@@ -41,7 +41,7 @@ public:
 	void* get_local_pawn() {
 
 		static auto fn = reinterpret_cast<void* (__fastcall*)(int)>(
-			g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 83 EC ? 83 F9 ? 75 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 48 8B 01 FF 90 ? ? ? ? 8B 08 48 63 C1 4C 8D 05")
+			g_opcodes->get_absolute_address(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 44 8B 45 17 48 8B 38 4C 8B 4D 0F 8B 75 0B"), 0x1)
 			);
 		if (fn)
 			return fn(-1);
@@ -51,7 +51,7 @@ public:
 	void* get_local_controller() {
 
 		static auto fn = reinterpret_cast<void* (__fastcall*)(int)>(
-			g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 83 EC ? 83 F9 ? 75 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 48 8B 01 FF 90 ? ? ? ? 8B 08 48 63 C1 48 8D 0D ? ? ? ? 48 8B 04 C1 48 83 C4 ? C3 CC CC CC CC CC CC CC CC CC CC CC CC CC 48 83 EC ? 83 F9")
+			g_opcodes->get_absolute_address(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 44 8B 45 17 48 8B 38 4C 8B 55"), 0x1)
 			);
 		if (fn)
 			return fn(-1);
