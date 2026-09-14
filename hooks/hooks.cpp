@@ -27,46 +27,6 @@ inline uint32_t hash_event_name(const char* str) {
 	return hash;
 }
 
-namespace knife_db {
-	struct entry { std::uint16_t def; const char* full; };
-	inline constexpr entry kSkinKnives[] = {
-		{500, "weapon_bayonet"},                {503, "weapon_knife_css"},
-		{505, "weapon_knife_flip"},             {506, "weapon_knife_gut"},
-		{507, "weapon_knife_karambit"},         {508, "weapon_knife_m9_bayonet"},
-		{509, "weapon_knife_tactical"},         {512, "weapon_knife_falchion"},
-		{514, "weapon_knife_survival_bowie"},   {515, "weapon_knife_butterfly"},
-		{516, "weapon_knife_push"},             {517, "weapon_knife_cord"},
-		{518, "weapon_knife_canis"},            {519, "weapon_knife_ursus"},
-		{520, "weapon_knife_gypsy_jackknife"},  {521, "weapon_knife_outdoor"},
-		{522, "weapon_knife_stiletto"},         {523, "weapon_knife_widowmaker"},
-		{525, "weapon_knife_skeleton"},         {526, "weapon_knife_kukri"},
-	};
-
-	inline const char* lookup(std::uint16_t def) {
-		for (auto& e : kSkinKnives)
-			if (e.def == def) return e.full;
-		return nullptr;
-	}
-
-	inline bool matches(const char* name) {
-		if (!name || !*name) return false;
-		if (std::strncmp(name, "weapon_", 7) == 0) name += 7;
-		if (std::strcmp(name, "knife") == 0 || std::strcmp(name, "knife_t") == 0)
-			return true;
-		for (auto& e : kSkinKnives)
-			if (std::strcmp(name, e.full + 7) == 0) return true;
-		return false;
-	}
-}
-
-static const char* get_knife_weapon_name(int knife_index) {
-	if (knife_index <= 0
-		|| !g_item_schema->is_initialized()
-		|| knife_index >= (int)g_item_schema->knives.size())
-		return nullptr;
-	return knife_db::lookup(g_item_schema->knives[knife_index].definition_index);
-}
-
 bool c_hooks::initialize() {
 	MH_Initialize();
 
@@ -280,15 +240,22 @@ bool __fastcall hooks::fire_event_client_side::hk_fire_event_client_side(void* p
 	if (!valid_ptr(weapon_name))
 		return original(p_game_event_manager, p_game_event);
 
-	const bool is_knife = knife_db::matches(weapon_name);
+	if ((std::string(weapon_name).find("knife") != std::string::npos || std::string(weapon_name).find("bayonet") != std::string::npos) && g_cfg->knife_changer.m_knife != 0) {
+		auto* item_system = g_interfaces->m_source2_client->get_econ_item_system();
+		if (!item_system)
+			return original(p_game_event_manager, p_game_event);
 
-	if (is_knife && g_cfg->knife_changer.m_knife != 0) {
-		const char* new_weapon_name = get_knife_weapon_name(g_cfg->knife_changer.m_knife);
-		if (new_weapon_name) {
-			i_game_event::CUtlStringToken set_token("weapon");
-			set_token.pad = 0xFFFFFFFF;
-			i_game_event::set_string(p_game_event, &set_token, new_weapon_name, 0);
-		}
+		auto* item_schema = item_system->get_econ_item_schema();
+		if (!item_schema)
+			return original(p_game_event_manager, p_game_event);
+
+		c_econ_item_definition* item_def = g_item_schema->get_item_definition(g_item_schema->knives[g_cfg->knife_changer.m_knife].definition_index, item_schema->get_sorted_item_definition_map());
+		if (!item_def)
+			return original(p_game_event_manager, p_game_event);
+
+		i_game_event::CUtlStringToken set_token("weapon");
+		set_token.pad = 0xFFFFFFFF;
+		i_game_event::set_string(p_game_event, &set_token, item_def->get_item_name(), 0);
 	}
 
 	return original(p_game_event_manager, p_game_event);

@@ -67,6 +67,8 @@ public:
 		return 0;
 	}
 
+	c_econ_item_definition* get_item_definition(const uint16_t& def_index, c_utl_map<int, c_econ_item_definition*>& items);
+
 private:
 	bool m_initialized = false;
 	progress m_init_progress;

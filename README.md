@@ -4,6 +4,8 @@
 **This is fork of Nerv skinchager meant to be used on demos.  
 Fully compatible with [HLAE](https://github.com/advancedfx/advancedfx)**  
 
+**NOTE: If u want to use forked AfxHookSource2.dll with mirv_pov, use ["Stable Release" version](https://github.com/WangChuDi/advancedfx/releases/tag/mirv-pov-20260825)**  
+
 **How to use : [tutorial](https://www.youtube.com/watch?v=-Zf1VpzerdY)  
 Original Source : [click](https://www.unknowncheats.me/forum/counter-strike-2-releases/752533-nerv-skin-changer-online-fix-source-release.html)**
 

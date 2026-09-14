@@ -63,16 +63,18 @@ bool c_item_schema::is_paint_kit_for_item(const char* simple_weapon_name, c_pain
 	return g_interfaces->m_file_system->exists(get_skin_image_path(simple_weapon_name, paint_kit->m_name, true).c_str(), "GAME");
 }
 
-void c_item_schema::build_paint_kits_for_item(uint16_t def_index, c_utl_map<int, c_econ_item_definition*>& items, c_utl_map<int, c_paint_kit*>& paint_kit_map) {
-	c_econ_item_definition* item_def = nullptr;
-	const int items_n = items.count();
-	for (int i = 0; i < items_n; i++) {
+c_econ_item_definition* c_item_schema::get_item_definition(const uint16_t& def_index, c_utl_map<int, c_econ_item_definition*>& items) {
+	for (int i = 0; i < items.count(); i++) {
 		auto& node = items.element(i);
 		if (node.m_value && node.m_value->m_definition_index == def_index) {
-			item_def = node.m_value;
-			break;
+			return node.m_value;
 		}
 	}
+	return nullptr;
+}
+
+void c_item_schema::build_paint_kits_for_item(uint16_t def_index, c_utl_map<int, c_econ_item_definition*>& items, c_utl_map<int, c_paint_kit*>& paint_kit_map) {
+	c_econ_item_definition* item_def = get_item_definition(def_index, items);
 
 	if (!item_def)
 		return;
