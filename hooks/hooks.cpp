@@ -33,10 +33,7 @@ bool c_hooks::initialize() {
 	mouse_input_enabled::m_mouse_input_enabled.hook(vmt::get_v_method(g_interfaces->m_csgo_input, 23), mouse_input_enabled::hk_mouse_input_enabled);
 	enable_cursor::m_enable_cursor.hook(vmt::get_v_method(g_interfaces->m_input_system, 76), enable_cursor::hk_enable_cursor);
 
-	frame_stage_notify::m_frame_stage_notify.hook(
-		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 5C 24 ? 48 89 6C 24 ? 57 48 83 EC 40 48 8B F9 33 ED"),
-		frame_stage_notify::hk_frame_stage_notify
-	);
+	frame_stage_notify::m_frame_stage_notify.hook(vmt::get_v_method(g_interfaces->m_source2_client, 36),frame_stage_notify::hk_frame_stage_notify);
 
 	{
 		i_game_event::get_name = reinterpret_cast<i_game_event::GetNameFn>(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "8B 41 14 0F BA E0 1E 73 05 48 8D 41 18 C3"));
@@ -48,7 +45,7 @@ bool c_hooks::initialize() {
 	//@ida #STR: "?SaveKV3AsJSON@@YA_NPEBVKeyValues3@@PEAVCUtlString@@1@Z"
 	if (g_modules->m_modules.afxhooksource2_dll.get()) {
 		//for original afxsource2
-		unsigned char* address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 10 48 89 6C 24 20");
+		unsigned char* address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC 20 48 8B F2");
 		//for wangchudi's afxsource2
 		if (!address_fire_stage)
 			address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 ? 48 89 ? 24 ? 48 89 54 24 ? 48 89 4C 24");
@@ -58,8 +55,9 @@ bool c_hooks::initialize() {
 		);
 	}
 	else {
+		// #STR: "Callback for event \"%s\" is NULL!!!\n", "FireEvent: event '%s' not registered.\n", "Game event \"%s\", Tick %i:\n"
 		fire_event_client_side::m_fire_event_client_side.hook(
-			g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "40 53 41 54 41 56 48 83 EC ? 4C 8B F2"),
+			g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "40 53 56 41 54 48 83 EC 30 48 8B F2 48 8D 99"),
 			fire_event_client_side::hk_fire_event_client_side
 		);
 	}
@@ -72,17 +70,17 @@ bool c_hooks::initialize() {
 	//	Xrefs from, sub:
 	//	#STR: "VolumeMaxs", "VolumeMins", "Priority", "LPVIndex", "`anonymous-namespace'::DynamicLockHelper<struct `anonymous, "`anonymous-namespace'::DynamicLockHelper<struct `anonymous, "LockDynamicConstantBuffer failed in %s\n", "Transform"
 	smoke_voxel_draw::m_smoke_voxel_draw.hook(
-		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 40 48 8B 9C 24 ? ? ? ? 4D 8B F8 48 8B FA 48 8B F1 45 33 C0 BA"),
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 54 24 ? 55 57 48 8D AC 24 ? ? ? ? 48 81 EC"),
 		smoke_voxel_draw::hk_smoke_voxel_draw
 	);
 	// #STR: "cs_flash_frame_render_target_split_%d", "FlashbangOverlay", "CsgoForward"
 	draw_flashbang_overlay::m_draw_flashbang_overlay.hook(
-		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "85 D2 0F 88 ?? ?? ?? ?? 48 89 4C 24 ?? 55 56 41 55 41 56 41 57 48 8D AC 24"),
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "85 D2 0F 88 ? ? ? ? 48 89 4C 24 ? 55 56 41 55 41 56 41 57 48 8D AC 24"),
 		draw_flashbang_overlay::hk_draw_flashbang_overlay
 	);
 	// #STR: "FirstpersonLegsPass1", "FirstpersonLegsPass2", "CsgoForward", "Firstperson Legs", "FirstpersonLegsPrepass"
 	firstperson_legs_prepass::m_firstperson_legs_prepass.hook(
-		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "40 55 53 56 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? F2 0F 10 42"),
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "4C 8B DC 55 53 56 57 41 57 49 8D AB ? ? ? ? 48 81 EC"),
 		firstperson_legs_prepass::hk_firstperson_legs_prepass
 	);
 
@@ -101,7 +99,7 @@ bool c_hooks::initialize() {
 
 	//@ida: scenesystem.dll -> class CLightBinnerGPU -> 3 index vtable
 	draw_array_light::m_draw_array_light.hook(
-		g_opcodes->scan(g_modules->m_modules.scenesystem_dll.get_name(), "48 89 54 24 ? 55 57 41 56 48 83 EC 50 48 8B FA 48 8B E9 BA ? ? ? ?"),
+		g_opcodes->scan(g_modules->m_modules.scenesystem_dll.get_name(), "48 89 54 24 ? 55 57 41 56 48 83 EC 50 48 8B 05"),
 		draw_array_light::hk_draw_array_light
 	);
 

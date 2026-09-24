@@ -152,6 +152,6 @@ struct view_matrix_t {
 class c_source2_client {
 public:
 	c_econ_item_system* get_econ_item_system() {
-		return vmt::call_virtual<c_econ_item_system*>(this, 128);
+		return vmt::call_virtual<c_econ_item_system*>(this, 129);
 	}
 };

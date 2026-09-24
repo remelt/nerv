@@ -586,12 +586,12 @@ public:
 
 	void update_skin(bool force = true) {
 
-		vmt::call_virtual<void>(this, 111, force);
+		vmt::call_virtual<void>(this, 113, force);
 	}
 
 	void update_weapon_data() {
 
-		vmt::call_virtual<void*>(this, 197);
+		vmt::call_virtual<void*>(this, 200);
 
 	}
 
