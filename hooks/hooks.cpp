@@ -42,13 +42,14 @@ bool c_hooks::initialize() {
 		i_game_event::get_player_controller = reinterpret_cast<i_game_event::GetPlayerControllerFn>(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 83 EC 38 8B 02 4C 8D 44 24 20"));
 	}
 
-	//@ida #STR: "?SaveKV3AsJSON@@YA_NPEBVKeyValues3@@PEAVCUtlString@@1@Z"
 	if (g_modules->m_modules.afxhooksource2_dll.get()) {
 		//for original afxsource2
+		//@ida #STR: "?SaveKV3AsJSON@@YA_NPEBVKeyValues3@@PEAVCUtlString@@1@Z"
 		unsigned char* address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC 20 48 8B F2");
 		//for wangchudi's afxsource2
+		//@ida #STR: "FireEventClientSide-after-dispatch"
 		if (!address_fire_stage)
-			address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 ? 48 89 ? 24 ? 48 89 54 24 ? 48 89 4C 24");
+			address_fire_stage = g_opcodes->scan(g_modules->m_modules.afxhooksource2_dll.get_name(), "48 89 5C 24 ? 56 57 41 56 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 48 8B DA 4C 8B F1 48 89 4C 24");
 
 		fire_event_client_side::m_fire_event_client_side.hook(address_fire_stage,
 			fire_event_client_side::hk_fire_event_client_side
@@ -327,8 +328,9 @@ HRESULT __stdcall hooks::create_swap_chain::hk_create_swap_chain(IDXGIFactory* f
 void* __fastcall hooks::build_material::hk_build_material(void* rcx, void* weapon, void* vector)
 {
 	auto original = m_build_material.get_original<decltype(&hk_build_material)>();
-
-	g_changer->on_build_material_hook(vector, *reinterpret_cast<c_econ_item_view**>((uintptr_t)rcx - 0x38));
+	int index_entity = *reinterpret_cast<int*>((uintptr_t)vector + 0x4);
+	if(index_entity != INVALID_EHANDLE_INDEX)
+		g_changer->on_build_material_hook(vector, *reinterpret_cast<c_econ_item_view**>((uintptr_t)vector - 0xB8));
 
 	return original(rcx, weapon, vector);
 }
