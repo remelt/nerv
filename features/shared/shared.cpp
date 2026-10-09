@@ -109,7 +109,7 @@ void set_color(void* vector, const std::vector<uint32_t>& buffer) {
 
 		//v125 = sub_180BF5380(v170, "g_nRandomSeed", v124);
 		//g_append(&v136, v125);							<--
-		static auto g_append = reinterpret_cast<void(__fastcall*)(void*, const CompositeMaterialInputLooseVariable_t*)>(g_opcodes->get_absolute_address(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "E8 ? ? ? ? 48 8D 4D 10 E8 ? ? ? ? 49 8B 06"), 0x1));
+		static auto g_append = reinterpret_cast<void(__fastcall*)(void*, const CompositeMaterialInputLooseVariable_t*)>(g_opcodes->get_absolute_address(g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "E8 ? ? ? ? 48 8D 4D 20 E8 ? ? ? ? 48 8B 07 48 8B CF FF 50 20"), 0x1));
 		g_append(vector, &v);
 	}
 }

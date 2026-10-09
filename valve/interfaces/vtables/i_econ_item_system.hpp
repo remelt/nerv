@@ -101,27 +101,17 @@ public:
 class c_econ_item_schema {
 public:
 
-	static constexpr auto OFFSET_SORTED_ITEM_DEF_MAP = 0xF8;
-	static constexpr auto OFFSET_PAINT_KITS = 0x2F0;
-	static constexpr auto OFFSET_MUSIC_KITS = 0x4D0;
-
 	c_utl_map<int, c_econ_item_definition*>& get_sorted_item_definition_map() {
-		return *reinterpret_cast<c_utl_map<int, c_econ_item_definition*>*>(
-			reinterpret_cast<std::uintptr_t>(this) + OFFSET_SORTED_ITEM_DEF_MAP
-		);
+		return *reinterpret_cast<c_utl_map<int, c_econ_item_definition*>*>(reinterpret_cast<std::uintptr_t>(this) + 0xF8);
 	}
 
 	c_utl_map<int, c_paint_kit*>& get_paint_kits() {
-		return *reinterpret_cast<c_utl_map<int, c_paint_kit*>*>(
-			reinterpret_cast<std::uintptr_t>(this) + OFFSET_PAINT_KITS
-		);
+		return *reinterpret_cast<c_utl_map<int, c_paint_kit*>*>(reinterpret_cast<std::uintptr_t>(this) + 0x2A0);
 	}
 
-	c_utl_map<int, c_music_kit*>& get_music_kits() {
-		return *reinterpret_cast<c_utl_map<int, c_music_kit*>*>(
-			reinterpret_cast<std::uintptr_t>(this) + OFFSET_MUSIC_KITS
-		);
-	}
+	//c_utl_map<int, c_music_kit*>& get_music_kits() {
+	//	return *reinterpret_cast<c_utl_map<int, c_music_kit*>*>(reinterpret_cast<std::uintptr_t>(this) + 0x4D0);
+	//}
 };
 
 class c_econ_item_system {
