@@ -616,7 +616,7 @@ public:
 		static auto fn = reinterpret_cast<void(__fastcall*)(void*, void*)>(
 			g_opcodes->scan(
 				g_modules->m_modules.client_dll.get_name(),
-				"40 55 53 41 56 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B DA 4C 8B"
+				"40 55 57 41 56 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 4C 8B F1 48 8B FA 48 8B 0D"
 			)
 			);
 
@@ -625,7 +625,7 @@ public:
 		}
 
 	}
-
+	// @ida str: "Invalid filename argument '%s'\n", "Annotation: Error loading file %s : %s", "Annotation: %s map mismatch (expecting %s but you are in %s)\n"
 	void rebuild_animgraph() {
 		static auto fn = reinterpret_cast<void(__fastcall*)(void*)>(
 			g_opcodes->scan(
