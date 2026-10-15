@@ -81,7 +81,7 @@ bool c_hooks::initialize() {
 	);
 	// #STR: "FirstpersonLegsPass1", "FirstpersonLegsPass2", "CsgoForward", "Firstperson Legs", "FirstpersonLegsPrepass"
 	firstperson_legs_prepass::m_firstperson_legs_prepass.hook(
-		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "4C 8B DC 55 53 56 57 41 57 49 8D AB ? ? ? ? 48 81 EC"),
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "4C 8B DC 55 53 56 57 41 56 49 8D AB ? ? ? ? 48 81 EC"),
 		firstperson_legs_prepass::hk_firstperson_legs_prepass
 	);
 
