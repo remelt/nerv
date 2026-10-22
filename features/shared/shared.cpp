@@ -5,14 +5,18 @@
 
 void c_changer::run() {
 	auto game_client = g_interfaces->m_network_client->GetNetworkGameClient();
-	if (!game_client)
+
+	bool in_game = g_interfaces->m_engine2_to_client->IsConnected() && g_interfaces->m_engine2_to_client->IsInGame();
+
+	if (!game_client || !in_game)
 		return;
 
 	if (!g_ctx->m_local_pawn || !g_interfaces->m_network_client || !g_item_schema->is_initialized())
 		return;
 
 	auto* local_pawn = reinterpret_cast<c_cs_player_pawn*>(g_ctx->m_local_pawn);
-	if (!valid_ptr(local_pawn) || local_pawn->m_health() <= 0)
+
+	if (!valid_ptr(local_pawn))
 		return;
 
 	auto observer_service = local_pawn->m_observer_services();
@@ -20,7 +24,7 @@ void c_changer::run() {
 		return;
 
 	auto observer_target = g_interfaces->m_game_resource->pGameEntitySystem->Get<c_cs_player_pawn>(observer_service->m_observer_target());
-	if (!observer_target || !valid_ptr(observer_target) || observer_target->m_health() <= 0)
+	if (!observer_target || !valid_ptr(observer_target) || !observer_target->is_player() || !observer_target->m_entity()->is_safe_to_modify() || !observer_target->is_alive())
 		return;
 
 	g_ctx->m_observer_target = observer_target;
@@ -31,6 +35,8 @@ void c_changer::run() {
 	cur_engine_data.m_demo_tick = g_interfaces->m_engine2_to_client->GetCurrentDemoTick();
 
 	auto* controller = observer_target->get_controller();
+	if(!controller)
+		return;
 
 	g_agent_changer->run(observer_target, cur_engine_data);
 

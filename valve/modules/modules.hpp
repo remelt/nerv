@@ -47,6 +47,7 @@ private:
 		c_dll resourcesystem_dll{};
 		c_dll rendersystem_dll{};
 		c_dll scenesystem_dll{};
+		c_dll materialsystem_dll{};
 		c_dll afxhooksource2_dll{};
 		void initialize();
 	};

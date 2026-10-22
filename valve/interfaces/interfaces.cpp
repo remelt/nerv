@@ -45,7 +45,16 @@ void c_interfaces::initialize()
 
 	m_resource_system = get_interface<i_resource_system>(&g_modules->m_modules.resourcesystem_dll, xorstr_("ResourceSystem013"));
 	CHECK(xorstr_("Resource Client"), m_resource_system);
+
+	//m_prediction = get_interface<c_prediction>(&g_modules->m_modules.client_dll, xorstr_("Source2ClientPrediction001"));
+	//CHECK(xorstr_("Client Prediction"), m_prediction);
 	
+	m_material_system2 = get_interface<i_material_system2>(&g_modules->m_modules.materialsystem_dll, xorstr_("VMaterialSystem2_001"));
+	CHECK(xorstr_("Material System"), m_material_system2);
+
+	m_network_string_table = *reinterpret_cast<i_network_string_table**>(g_opcodes->scan_absolute(g_modules->m_modules.client_dll.get_name(), xorstr_("48 8B 0D ? ? ? ? 48 8B 01 4C 8B 40 58 8B 45 E4"), 0x3));
+	CHECK(xorstr_("Network String Table"), m_network_string_table);
+
 	m_swap_chain = **reinterpret_cast<ISwapChainDx11***>(g_opcodes->scan_absolute(g_modules->m_modules.rendersystem_dll.get_name(), xorstr_("48 89 2D ? ? ? ? 66 0F 7F 05 ? ? ? ? FF 15"), 0x3));
 	CHECK(xorstr_("Swap Chain"), m_swap_chain);
 }

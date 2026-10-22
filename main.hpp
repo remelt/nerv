@@ -34,10 +34,13 @@
 #include "menu/menu.hpp"
 #include "hooks/hooks.hpp"
 
+class c_scene_skybox_object;
+
 struct globals_t {
 	void* m_local_pawn;
 	void* m_local_controller;
 	void* m_observer_target; // pawn
+	c_scene_skybox_object* m_skybox_object = nullptr;
 };
 
 inline const auto g_ctx = std::make_unique<globals_t>();

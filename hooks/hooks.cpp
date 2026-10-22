@@ -4,6 +4,7 @@
 #include "../features/shared/item_schema.hpp"
 #include "../features/shared/shared.hpp"
 #include "../features//agent_changer/agent_changer.hpp"
+#include "../features/visuals/visuals.h"
 #include "../valve/interfaces/vtables/i_csgo_input.hpp"
 #include "../valve/interfaces/vtables/i_game_event.hpp"
 #include "../valve/classes/c_cs_player_pawn.hpp"
@@ -32,7 +33,6 @@ bool c_hooks::initialize() {
 
 	mouse_input_enabled::m_mouse_input_enabled.hook(vmt::get_v_method(g_interfaces->m_csgo_input, 23), mouse_input_enabled::hk_mouse_input_enabled);
 	enable_cursor::m_enable_cursor.hook(vmt::get_v_method(g_interfaces->m_input_system, 76), enable_cursor::hk_enable_cursor);
-
 	frame_stage_notify::m_frame_stage_notify.hook(vmt::get_v_method(g_interfaces->m_source2_client, 36),frame_stage_notify::hk_frame_stage_notify);
 
 	{
@@ -63,15 +63,22 @@ bool c_hooks::initialize() {
 		);
 	}
 
+	// @ida: #STR: ; "game_newmap"; "mapname" ; "transition"
 	level_init::m_level_init.hook(
 		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 74 24 ? 57 48 83 EC ? 48 8B 0D ? ? ? ? 48 8B FA"),
 		level_init::hk_level_init
 	);
 
+	// @ida: ClientModeShared -> #STR: "map_shutdown"
+	level_shutdown::m_level_shutdown.hook(
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 83 EC ? 48 8B 0D ? ? ? ? 48 8D 15 ? ? ? ? 45 33 C9 45 33 C0 ? ? ? FF 50 ? 48 85 C0 74 ? 48 8B 0D ? ? ? ? 48 8B D0 ? ? ? 41 FF 50 ? 48 83 C4"),
+		level_shutdown::hk_level_shutdown
+	);
+
 	//	Xrefs from, sub:
 	//	#STR: "VolumeMaxs", "VolumeMins", "Priority", "LPVIndex", "`anonymous-namespace'::DynamicLockHelper<struct `anonymous, "`anonymous-namespace'::DynamicLockHelper<struct `anonymous, "LockDynamicConstantBuffer failed in %s\n", "Transform"
 	smoke_voxel_draw::m_smoke_voxel_draw.hook(
-		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 54 24 ? 55 57 48 8D AC 24 ? ? ? ? 48 81 EC"),
+		g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 40 48 8B 9C 24 ? ? ? ? 4D 8B F8 48 8B FA"),
 		smoke_voxel_draw::hk_smoke_voxel_draw
 	);
 	// #STR: "cs_flash_frame_render_target_split_%d", "FlashbangOverlay", "CsgoForward"
@@ -104,13 +111,14 @@ bool c_hooks::initialize() {
 		draw_array_light::hk_draw_array_light
 	);
 
-	auto loc_1808E9E54 = g_opcodes->scan(g_modules->m_modules.client_dll.get_name(), "74 2A 48 8B 0D ? ? ? ? 48 8D 44 24 ? 48 89 7C 24 ? 4C 8D 4C 24 ? 4C 8D 45 A0 48 89 44 24 ? 48 8D 55 20");
-	if (loc_1808E9E54) {
-		DWORD oldProtect;
-		VirtualProtect((PVOID)loc_1808E9E54, 0x2, PAGE_EXECUTE_READWRITE, &oldProtect);
-		*(WORD*)loc_1808E9E54 = 0x2AEB;
-		VirtualProtect((PVOID)loc_1808E9E54, 0x2, oldProtect, &oldProtect);
-	}
+	//@ida: scenesystem.dll -> class CSkyBoxObjectDesc -> 1 index vtable
+	skybox_draw_array::m_skybox_draw_array.hook(
+		g_opcodes->scan(g_modules->m_modules.scenesystem_dll.get_name(), "45 85 C9 0F 8E ? ? ? ? 4C 8B DC 55 41 56 49 8D AB ? ? ? ? 48 81 EC"),
+		skybox_draw_array::hk_skybox_draw_array
+	);
+
+	//@ida: engine.dll -> class CNetworkStringTable -> 11 index vtable
+	check_table::m_check_table.hook(vmt::get_v_method(g_interfaces->m_network_string_table, 11), check_table::hk_check_table);
 
 	return true;
 }
@@ -166,13 +174,16 @@ void hooks::frame_stage_notify::hk_frame_stage_notify(void* source_to_client, in
 	auto original = m_frame_stage_notify.get_original<decltype(&hk_frame_stage_notify)>();
 
 	if (stage == 7) {
-
 		g_ctx->m_local_controller = g_interfaces->m_entity_system->get_local_controller();
 		g_ctx->m_local_pawn = g_interfaces->m_entity_system->get_local_pawn();
 
 		if (g_ctx->m_local_pawn != nullptr && g_ctx->m_local_controller != nullptr) {
 			g_changer->run();
 		}
+	}
+	else if (stage == 5)
+	{
+		g_visuals->skybox_changer();
 	}
 
 	original(source_to_client, stage);
@@ -189,9 +200,17 @@ __int64 __fastcall hooks::level_init::hk_level_init(void* rcx, void* rdx) {
 		//g_glove_changer->should_update = true;
 	}
 
-	g_world->Reset();
-
 	return original(rcx, rdx);
+}
+
+__int64 __fastcall hooks::level_shutdown::hk_level_shutdown(void* rcx)
+{
+	auto original = m_level_shutdown.get_original<decltype(&hk_level_shutdown)>();
+
+	g_world->Reset();
+	g_ctx->m_skybox_object = nullptr;
+
+	return original(rcx);
 }
 
 bool __fastcall hooks::fire_event_client_side::hk_fire_event_client_side(void* p_game_event_manager, void* p_game_event) {
@@ -325,14 +344,19 @@ HRESULT __stdcall hooks::create_swap_chain::hk_create_swap_chain(IDXGIFactory* f
 }
 
 //https://www.unknowncheats.me/forum/counter-strike-2-a/754206-custom-paintkit-colors.html
-void* __fastcall hooks::build_material::hk_build_material(void* rcx, void* weapon, void* vector)
+void* __fastcall hooks::build_material::hk_build_material(void* rcx, const char* string, void* vector)
 {
 	auto original = m_build_material.get_original<decltype(&hk_build_material)>();
-	int index_entity = *reinterpret_cast<int*>((uintptr_t)vector + 0x4);
-	if(index_entity != INVALID_EHANDLE_INDEX)
-		g_changer->on_build_material_hook(vector, *reinterpret_cast<c_econ_item_view**>((uintptr_t)vector - 0xB8));
 
-	return original(rcx, weapon, vector);
+
+	if (g_ctx->m_local_pawn && (!_stricmp(string, "econ_instance") || !_stricmp(string, "patch_queue")))
+	{
+		int index_entity = *reinterpret_cast<int*>((uintptr_t)vector + 0x4);
+		if(index_entity != INVALID_EHANDLE_INDEX)
+			g_changer->on_build_material_hook(vector, *reinterpret_cast<c_econ_item_view**>((uintptr_t)vector - 0xB8));
+	}
+
+	return original(rcx, string, vector);
 }
 
 void __fastcall hooks::draw_array_light::hk_draw_array_light(CLightBinnerGpu* pLightBinnerGPU, CAggregateSceneObject* pAggregateSceneObject, CSceneObjectInfo* a3)
@@ -398,5 +422,39 @@ void __fastcall hooks::draw_array_light::hk_draw_array_light(CLightBinnerGpu* pL
 		}
 	}
 
+	if(g_ctx->m_skybox_object)
+	{
+		vec3_t skybox_color;
+		skybox_color.x = g_cfg->visuals.m_color_skybox[0];
+		skybox_color.y = g_cfg->visuals.m_color_skybox[1];
+		skybox_color.z = g_cfg->visuals.m_color_skybox[2];
+
+		g_ctx->m_skybox_object->SkyBoxColor = skybox_color;
+	}
+
 	original(pLightBinnerGPU, pAggregateSceneObject, a3);
+}
+
+void __fastcall hooks::skybox_draw_array::hk_skybox_draw_array(void* rcx, void* rdx, void* pSceneData, int iDataCount, int a5, void* a6, void* a7)
+{
+	auto original = m_skybox_draw_array.get_original<decltype(&hk_skybox_draw_array)>();
+
+	g_ctx->m_skybox_object = *(c_scene_skybox_object**)((uintptr_t)pSceneData + 0x18);
+
+	original(rcx, rdx, pSceneData, iDataCount, a5, a6, a7);
+}
+
+int64_t __fastcall hooks::check_table::hk_check_table(i_network_string_table* pNetworkStringTable, const char* pPathVnmskel)
+{
+	auto original = m_check_table.get_original<decltype(&hk_check_table)>();
+
+	int index = original(pNetworkStringTable, pPathVnmskel);
+	if (index == -1 && strstr(pPathVnmskel, "animation/skeletons/weapons/knife_"))
+	{
+		index = pNetworkStringTable->AddString(true, pPathVnmskel, nullptr);
+
+		LOG_INFO("CheckTable: Added knife skeleton: %s, index: %d", pPathVnmskel, index);
+	}
+
+	return index;
 }

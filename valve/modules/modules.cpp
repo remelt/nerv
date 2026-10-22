@@ -19,6 +19,7 @@ void c_modules::modules_t::initialize() {
 	REQUIRE(resourcesystem_dll,	"resourcesystem.dll");
 	REQUIRE(rendersystem_dll,	"rendersystemdx11.dll");
 	REQUIRE(scenesystem_dll,	"scenesystem.dll");
+	REQUIRE(materialsystem_dll, "materialsystem2.dll");
 	afxhooksource2_dll = c_dll(xorstr_("afxhooksource2.dll"));
 	localize_dll = c_dll(xorstr_("localize.dll"));
 	if (!localize_dll.get())

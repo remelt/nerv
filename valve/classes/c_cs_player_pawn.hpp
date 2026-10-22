@@ -466,7 +466,7 @@ public:
 	SCHEMA(m_vec_abs_velocity, vec3_t, "C_BaseEntity", "m_vecAbsVelocity");
 	SCHEMA(m_sim_time, float, "C_BaseEntity", "m_flSimulationTime");
 	SCHEMA(m_simulation_tick, int, "C_BaseEntity", "m_nSimulationTick");
-
+	SCHEMA(is_predictable, bool, "C_BaseEntity", "m_bPredictable");
 
 	void set_model(const char* model_path) {
 		static auto fn = reinterpret_cast<void(__fastcall*)(void*, const char*)>(
@@ -650,6 +650,24 @@ public:
 
 using firing_float_t = float[2];
 
+struct InfoForResourceTypeCNmSkeleton
+{
+};
+
+template <typename T>
+class CWeakHandle {
+public:
+	void* m_pBinding;
+};
+
+template <typename T>
+class CResourceNameTyped {
+public:
+	int m_nLength;
+	int m_nAllocatedSize;
+	char m_szString[200];
+};
+
 class c_cs_weapon_base_v_data {
 public:
 	SCHEMA(m_max_clip1, int32_t, "CBasePlayerWeaponVData", "m_iMaxClip1");
@@ -668,6 +686,8 @@ public:
 	SCHEMA(m_spread, float, "CCSWeaponBaseVData", "m_flSpread");
 	SCHEMA(m_bullets, int, "CCSWeaponBaseVData", "m_nNumBullets");
 	SCHEMA(m_weapon_type, int, "CCSWeaponBaseVData", "m_WeaponType");
+	SCHEMA(m_szAnimSkeleton, CResourceNameTyped<CWeakHandle<InfoForResourceTypeCNmSkeleton>>, "CCSWeaponBaseVData", "m_szAnimSkeleton");
+
 };
 
 class c_base_player_weapon : public c_econ_entity {
@@ -894,6 +914,11 @@ public:
 			return true;
 
 		return false;
+	}
+
+	bool is_player()
+	{
+		return vmt::call_virtual<bool>(this, 158U);
 	}
 
 };

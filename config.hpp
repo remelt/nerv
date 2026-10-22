@@ -91,6 +91,9 @@ public:
 		bool m_change_color_light = false;
 		float m_color_light[4] = { 1.f, 1.f, 1.f, 1.f };
 
+		int m_skybox_selected = 0;
+		float m_color_skybox[4] = { 1.f, 1.f, 1.f, 1.f };
+
 	} visuals;
 
 };

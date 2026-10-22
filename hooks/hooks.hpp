@@ -3,7 +3,7 @@
 class CLightBinnerGpu;
 class CAggregateSceneObject;
 class CSceneObjectInfo;
-
+class i_network_string_table;
 
 class c_hook {
 	void* m_function = nullptr;
@@ -87,6 +87,11 @@ namespace hooks {
 		__int64 __fastcall hk_level_init(void* rcx, void* rdx);
 	}
 
+	namespace level_shutdown {
+		inline c_hook m_level_shutdown;
+		__int64 __fastcall hk_level_shutdown(void* rcx);
+	}
+
 	namespace smoke_voxel_draw {
 		inline c_hook m_smoke_voxel_draw;
 		void* __fastcall hk_smoke_voxel_draw(void* a1, void* a2, int a3, int a4, void* a5, void* a6);
@@ -120,13 +125,25 @@ namespace hooks {
 	namespace build_material
 	{
 		inline c_hook m_build_material;
-		void* __fastcall hk_build_material(void* rcx, void* weapon, void* vector);
+		void* __fastcall hk_build_material(void* rcx, const char* string, void* vector);
 	}
 
 	namespace draw_array_light
 	{
 		inline c_hook m_draw_array_light;
 		void __fastcall hk_draw_array_light(CLightBinnerGpu* pLightBinnerGPU, CAggregateSceneObject* pAggregateSceneObject, CSceneObjectInfo* a3);
+	}
+
+	namespace check_table
+	{
+		inline c_hook m_check_table;
+		int64_t __fastcall hk_check_table(i_network_string_table* pNetworkStringTable, const char* pPathVnmskel);
+	}
+
+	namespace skybox_draw_array
+	{
+		inline c_hook m_skybox_draw_array;
+		void __fastcall hk_skybox_draw_array(void* rcx, void* rdx, void* pSceneData, int iDataCount, int a5, void* a6, void* a7);
 	}
 
 }

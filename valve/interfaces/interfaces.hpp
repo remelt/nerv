@@ -12,6 +12,9 @@
 #include "vtables/i_mem_alloc.hpp"
 #include "vtables/i_panorama.h"
 #include "vtables/i_source2_engine_to_client.h"
+#include "vtables/i_prediction.h"
+#include "vtables/i_network_string_table.h"
+#include "vtables/i_material.h"
 
 template <typename type_t = void*>
 inline type_t* get_interface(c_dll* dll, const char* name)
@@ -44,6 +47,9 @@ public:
 	i_panorama* m_panorama;
 	ISwapChainDx11* m_swap_chain;
 	ISource2EngineToClient* m_engine2_to_client;
+	c_prediction* m_prediction;
+	i_network_string_table* m_network_string_table;
+	i_material_system2* m_material_system2;
 
 	void initialize();
 };

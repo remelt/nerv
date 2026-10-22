@@ -91,6 +91,7 @@
     <ClInclude Include="features\shared\shared.hpp" />
     <ClInclude Include="features\shared\data.hpp" />
     <ClInclude Include="features\skin_changer\skin_changer.hpp" />
+    <ClInclude Include="features\visuals\visuals.h" />
     <ClInclude Include="hooks\hooks.hpp" />
     <ClInclude Include="main.hpp" />
     <ClInclude Include="menu\menu.hpp" />
@@ -131,9 +132,12 @@
     <ClInclude Include="valve\interfaces\vtables\i_game_event.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_game_resource_service.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_localize.hpp" />
+    <ClInclude Include="valve\interfaces\vtables\i_material.h" />
     <ClInclude Include="valve\interfaces\vtables\i_mem_alloc.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_network_game_client.hpp" />
+    <ClInclude Include="valve\interfaces\vtables\i_network_string_table.h" />
     <ClInclude Include="valve\interfaces\vtables\i_panorama.h" />
+    <ClInclude Include="valve\interfaces\vtables\i_prediction.h" />
     <ClInclude Include="valve\interfaces\vtables\i_resource_system.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_schema_system.hpp" />
     <ClInclude Include="valve\interfaces\vtables\i_source2_engine_to_client.h" />
@@ -149,6 +153,7 @@
     <ClCompile Include="features\shared\item_schema.cpp" />
     <ClCompile Include="features\shared\shared.cpp" />
     <ClCompile Include="features\skin_changer\skin_changer.cpp" />
+    <ClCompile Include="features\visuals\visuals.cpp" />
     <ClCompile Include="hooks\hooks.cpp" />
     <ClCompile Include="menu\menu.cpp" />
     <ClCompile Include="sdk\config_system\config_system.cpp" />

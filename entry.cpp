@@ -7,6 +7,7 @@
 #include "features/shared/item_schema.hpp"
 #include "features/skin_changer/skin_changer.hpp"
 #include "features/glove_changer/glove_changer.hpp"
+#include "features/visuals/visuals.h"
 
 #include "sdk/config_system/config_system.hpp"
 #include <thread>
@@ -36,6 +37,9 @@ uintptr_t __stdcall start_address(const HMODULE h_module)
 
         LOG_INFO("Initializing directx...");
         g_directx->initialize();
+
+        LOG_INFO("Initializing skybox parser...");
+        g_visuals->skybox_parser();
 
         LOG_INFO("Initializing hooks...");
         g_hooks->initialize();

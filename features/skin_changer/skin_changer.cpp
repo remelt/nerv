@@ -5,6 +5,7 @@
 #include "../../valve/schema/schema.hpp"
 #include "../../valve/interfaces/vtables/i_econ_item_system.hpp"
 #include "../../menu/menu.hpp"
+#include "../../main.hpp"
 
 #include <vector>
 #include <utility>
@@ -55,6 +56,26 @@ void c_skin_changer::apply_skin(c_econ_entity* weapon, c_econ_item_view* item, i
 
 	if (model) {
 		weapon->set_model(model);
+
+		//! dynamic pointer !
+		//g_interfaces->m_network_string_table = *reinterpret_cast<i_network_string_table**>(g_opcodes->scan_absolute(g_modules->m_modules.client_dll.get_name(), xorstr_("48 8B 0D ? ? ? ? 48 8B 01 4C 8B 40 58 8B 45 E4"), 0x3));
+		//
+		//c_base_player_weapon* weapon_entity = (c_base_player_weapon*)(weapon);
+		//if(weapon_entity)
+		//{
+		//	if(c_cs_weapon_base_v_data* weapon_data = weapon_entity->get_weapon_data())
+		//	{
+		//		if(const char* string_vnmskel = weapon_data->m_szAnimSkeleton().m_szString)
+		//		{
+		//			if(string_vnmskel != nullptr)
+		//			{
+		//				int index = g_interfaces->m_network_string_table->m_network_string_dict->FindStringIndex(string_vnmskel);
+		//				if (index == -1)
+		//					g_interfaces->m_network_string_table->AddString(true, string_vnmskel, nullptr);
+		//			}
+		//		}
+		//	}
+		//}
 
 		if (auto* hud_weapon = get_hud_weapon(weapon, local_pawn)) {
 			hud_weapon->set_model(model);
@@ -186,7 +207,7 @@ void c_skin_changer::run(c_cs_player_pawn* observer_target, engine_data current)
 
 	for (unsigned int i = 0; i < my_weapons.m_size; i++) {
 		auto* weapon = reinterpret_cast<c_econ_entity*>(g_interfaces->m_entity_system->get_base_entity(my_weapons.m_elements[i].get_entry_index()));
-		if (!weapon) continue;
+		if (!weapon || !weapon->m_entity()->is_safe_to_modify()) continue;
 
 		auto* item = weapon->m_attribute_manager()->m_item();
 		if (!valid_ptr(item)) continue;

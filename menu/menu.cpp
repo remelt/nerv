@@ -10,6 +10,7 @@
 #include "../features/skin_changer/skin_changer.hpp"
 #include "../features/glove_changer/glove_changer.hpp"
 #include "../features/agent_changer/agent_changer.hpp"
+#include "../features/visuals/visuals.h"
 #include "../sdk/config_system/config_system.hpp"
 #include "../valve/classes/c_cs_player_pawn.hpp"
 #include "../valve/interfaces/interfaces.hpp"
@@ -625,6 +626,14 @@ static void draw_visauls_tab()
 
 	ImGui::Text("World");
 	ImGui::Separator();
+
+	ImGui::Text(("Skybox Changer"));
+	ImGui::Combo(("##Skybox"), &g_cfg->visuals.m_skybox_selected, g_visuals->SkyBoxesArray.SkyBoxName.data(), g_visuals->SkyBoxesArray.SkyBoxName.size());
+	ImGui::SameLine(); ImGui::ColorEdit4("##SkyBoxColor", g_cfg->visuals.m_color_skybox, no_alpha);
+	if (ImGui::Button("Update Skybox"))
+	{
+		g_visuals->should_update = true;
+	}
 
 	ImGui::Checkbox(("Change Shadow Dir##shadows"), &g_cfg->visuals.m_change_shadow_dir);
 	ImGui::BeginDisabled(!g_cfg->visuals.m_change_shadow_dir);
