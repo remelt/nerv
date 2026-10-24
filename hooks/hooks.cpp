@@ -364,72 +364,90 @@ void __fastcall hooks::draw_array_light::hk_draw_array_light(CLightBinnerGpu* pL
 	auto original = m_draw_array_light.get_original<decltype(&hk_draw_array_light)>();
 
 	//Change Light Color
-	if (g_cfg->visuals.m_change_color_light)
+	if (pAggregateSceneObject)
 	{
-
-		if (g_world->m_light_color.is_zero())
+		if (g_cfg->visuals.m_change_color_light)
 		{
-			g_world->m_light_color = pAggregateSceneObject->m_cLightColor;
+			if (g_world->m_light_color.is_zero())
+			{
+				g_world->m_light_color = pAggregateSceneObject->m_cLightColor;
+			}
+
+			vec3_t LColor =
+			{
+				(g_cfg->visuals.m_color_light[0]) * (g_cfg->visuals.m_color_light[3]),
+				(g_cfg->visuals.m_color_light[1]) * (g_cfg->visuals.m_color_light[3]),
+				(g_cfg->visuals.m_color_light[2]) * (g_cfg->visuals.m_color_light[3])
+			};
+
+			pAggregateSceneObject->m_cLightColor = LColor;
+
 		}
-
-		vec3_t LColor;
-		LColor.x = (g_cfg->visuals.m_color_light[0]) * (g_cfg->visuals.m_color_light[3]);
-		LColor.y = (g_cfg->visuals.m_color_light[1]) * (g_cfg->visuals.m_color_light[3]);
-		LColor.z = (g_cfg->visuals.m_color_light[2]) * (g_cfg->visuals.m_color_light[3]);
-
-		pAggregateSceneObject->m_cLightColor = LColor;
-
-	}
-	else
-	{
-		if (!g_world->m_light_color.is_zero() && g_world->CheckVectors(pAggregateSceneObject->m_cLightColor, g_world->m_light_color))
+		else
 		{
-			pAggregateSceneObject->m_cLightColor = g_world->m_light_color;
+			if (!g_world->m_light_color.is_zero() && g_world->CheckVectors(pAggregateSceneObject->m_cLightColor, g_world->m_light_color))
+			{
+				pAggregateSceneObject->m_cLightColor = g_world->m_light_color;
+			}
 		}
 	}
+
 	//Change Light Direction
-	if (g_cfg->visuals.m_change_shadow_dir)
+	if (CSceneLightObject* pLightObject = a3->m_pScene->m_pSceneLightObject)
 	{
-		if (g_world->m_shadow_dir.is_zero())
-		{
-			g_world->m_shadow_dir = a3->m_pScene->m_pSceneLightObject->m_vDirectionNormalized;
-		}
-
-		vec3_t ShadowDir =
-		{
-			g_cfg->visuals.m_shadow_pitch,
-			g_cfg->visuals.m_shadow_yaw,
-			g_cfg->visuals.m_shadow_roll
-		};
-
-		ShadowDir.normalize_in_place();
-
-		if (CSceneLightObject* pLightObject = a3->m_pScene->m_pSceneLightObject)
+		if (g_cfg->visuals.m_change_shadow_dir)
 		{
 			if (g_world->m_shadow_dir.is_zero())
 			{
 				g_world->m_shadow_dir = pLightObject->m_vDirectionNormalized;
 			}
 
+			vec3_t ShadowDir =
+			{
+				g_cfg->visuals.m_shadow_pitch,
+				g_cfg->visuals.m_shadow_yaw,
+				g_cfg->visuals.m_shadow_roll
+			};
+
+			ShadowDir.normalize_in_place();
+
 			pLightObject->m_vDirectionNormalized = ShadowDir;
 		}
-	}
-	else
-	{
-		if (!g_world->m_shadow_dir.is_zero() && g_world->CheckVectors(a3->m_pScene->m_pSceneLightObject->m_vDirectionNormalized, g_world->m_shadow_dir))
+		else
 		{
-			a3->m_pScene->m_pSceneLightObject->m_vDirectionNormalized = g_world->m_shadow_dir;
+			if (!g_world->m_shadow_dir.is_zero() && g_world->CheckVectors(pLightObject->m_vDirectionNormalized, g_world->m_shadow_dir))
+			{
+				pLightObject->m_vDirectionNormalized = g_world->m_shadow_dir;
+			}
 		}
 	}
 
-	if(g_ctx->m_skybox_object)
+	//Change SkyBox Color
+	if (g_ctx->m_skybox_object)
 	{
-		vec3_t skybox_color;
-		skybox_color.x = g_cfg->visuals.m_color_skybox[0];
-		skybox_color.y = g_cfg->visuals.m_color_skybox[1];
-		skybox_color.z = g_cfg->visuals.m_color_skybox[2];
+		if (g_cfg->visuals.m_change_sky_color) {
 
-		g_ctx->m_skybox_object->SkyBoxColor = skybox_color;
+			if (g_world->m_sky_color.is_zero())
+			{
+				g_world->m_sky_color = g_ctx->m_skybox_object->SkyBoxColor;
+			}
+
+			vec3_t skybox_color =
+			{
+				g_cfg->visuals.m_color_skybox[0] * g_cfg->visuals.m_color_skybox[3],
+				g_cfg->visuals.m_color_skybox[1] * g_cfg->visuals.m_color_skybox[3],
+				g_cfg->visuals.m_color_skybox[2] * g_cfg->visuals.m_color_skybox[3]
+			};
+
+			g_ctx->m_skybox_object->SkyBoxColor = skybox_color;
+		}
+		else
+		{
+			if (!g_world->m_sky_color.is_zero() && g_world->CheckVectors(g_ctx->m_skybox_object->SkyBoxColor, g_world->m_sky_color))
+			{
+				g_ctx->m_skybox_object->SkyBoxColor = g_world->m_sky_color;
+			}
+		}
 	}
 
 	original(pLightBinnerGPU, pAggregateSceneObject, a3);

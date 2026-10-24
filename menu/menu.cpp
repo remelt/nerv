@@ -628,11 +628,17 @@ static void draw_visauls_tab()
 	ImGui::Separator();
 
 	ImGui::Text(("Skybox Changer"));
-	ImGui::Combo(("##Skybox"), &g_cfg->visuals.m_skybox_selected, g_visuals->SkyBoxesArray.SkyBoxName.data(), g_visuals->SkyBoxesArray.SkyBoxName.size());
-	ImGui::SameLine(); ImGui::ColorEdit4("##SkyBoxColor", g_cfg->visuals.m_color_skybox, no_alpha);
+	ImGui::Combo(("##Skybox"), &g_cfg->visuals.m_skybox_selected, [](void* data, int idx, const char** out) { *out = g_visuals->SkyBoxesArray.SkyBoxName[idx].c_str(); return true; }, nullptr, (int)g_visuals->SkyBoxesArray.SkyBoxName.size()); ImGui::SameLine();
+
 	if (ImGui::Button("Update Skybox"))
 	{
 		g_visuals->should_update = true;
+	}
+
+	ImGui::Checkbox(("Change SkyBox Color##skycolor"), &g_cfg->visuals.m_change_sky_color);
+	if (g_cfg->visuals.m_change_sky_color)
+	{
+		ImGui::SameLine(); ImGui::ColorEdit4("##SkyBoxColor", g_cfg->visuals.m_color_skybox, with_alpha);
 	}
 
 	ImGui::Checkbox(("Change Shadow Dir##shadows"), &g_cfg->visuals.m_change_shadow_dir);

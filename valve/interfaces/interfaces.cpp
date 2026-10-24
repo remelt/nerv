@@ -10,8 +10,12 @@ void* get_entity_by_index(int index) {
 void c_interfaces::initialize()
 {
 	HMODULE tier0 = GetModuleHandleA("tier0.dll");
+
 	m_mem_alloc = *reinterpret_cast<i_mem_alloc**>(g_opcodes->export_fn((unsigned __int64)tier0, ("g_pMemAlloc")));
 	CHECK(xorstr_("IMemAlloc"), m_mem_alloc);
+
+	fn_get_game_directory = *reinterpret_cast<const char*(*)()>(g_opcodes->export_fn((unsigned __int64)tier0, ("Plat_GetGameDirectory")));
+	CHECK(xorstr_("Game Directory"), fn_get_game_directory);
 
 	m_csgo_input = *reinterpret_cast<i_csgo_input**>(g_opcodes->scan_absolute(g_modules->m_modules.client_dll.get_name(), xorstr_("48 8B 0D ? ? ? ? 4C 8B C6 8B 10 E8"), 0x3));
 	CHECK(xorstr_("CSGO Input"), m_csgo_input);

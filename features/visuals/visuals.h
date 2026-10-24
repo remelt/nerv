@@ -1,6 +1,8 @@
 #pragma once
 #include "../../main.hpp"
 
+#include <filesystem>
+
 inline const char* SkyBoxNames[] = {
     "none",
     "cs_italy",
@@ -47,10 +49,10 @@ inline const char* SkyBoxPaths[] = {
 
 struct CSkyBoxClass
 {
-    std::vector<const char*> SkyBoxName;
-    std::vector<const char*> SkyBoxPath;
+    std::vector<std::string> SkyBoxName;
+    std::vector<std::string> SkyBoxPath;
 
-    void emplace(const char* name, const char* path) {
+    void emplace(const std::string& name, const std::string& path) {
         SkyBoxName.push_back(name);
         SkyBoxPath.push_back(path);
     }
@@ -69,6 +71,9 @@ public:
 
     CSkyBoxClass SkyBoxesArray;
     bool should_update = false;
+
+private:
+    std::filesystem::path get_skybox_folder();
 };
 
 inline const auto g_visuals = std::make_unique<c_visuals>();

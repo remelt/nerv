@@ -48,10 +48,11 @@ inline const auto g_ctx = std::make_unique<globals_t>();
 struct world_variables_t {
 	vec3_t m_shadow_dir = vec3_t();
 	vec3_t m_light_color = vec3_t();
+	vec3_t m_sky_color = vec3_t();
 
 	void Reset()
 	{
-		m_shadow_dir = m_light_color = { 0.f, 0.f, 0.f };
+		m_shadow_dir = m_light_color = m_sky_color = { 0.f, 0.f, 0.f };
 	}
 
 	inline bool CheckVectors(vec3_t a, vec3_t b)

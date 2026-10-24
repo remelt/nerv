@@ -139,12 +139,15 @@ void c_skin_changer::process_weapon(c_econ_entity* weapon, c_econ_item_view* ite
 		return;
 
 	int paint_kit_id = g_item_schema->get_paint_kit_id_for_item(def_index, skin.paint_kit);
-	if (paint_kit_id == 0 || (weapon->m_paint_kit() == paint_kit_id && !force_update))
+	if (paint_kit_id == 0)
 		return;
 
 	apply_skin(weapon, item, paint_kit_id, skin.wear, skin.seed, skin.custom_name, local_pawn);
-	c_hud::clear_hud_weapon_icon_for(weapon);
 
+	if (weapon->m_paint_kit() == paint_kit_id && !force_update)
+		return;
+
+	c_hud::clear_hud_weapon_icon_for(weapon);
 	did_update = true;
 }
 
@@ -156,15 +159,16 @@ void c_skin_changer::process_knife(c_econ_entity* weapon, c_econ_item_view* item
 		return;
 
 	int paint_kit_id = g_item_schema->get_paint_kit_id_for_item(selected_knife, g_cfg->knife_changer.m_paint_kit);
-	if (def_index == selected_knife && weapon->m_paint_kit() == paint_kit_id && !force_update)
-		return;
 
 	if (selected_knife != WEAPON_KNIFE_T && selected_knife != WEAPON_KNIFE)
 		item->m_entity_quality() = QUALITY_UNUSUAL;
 
 	apply_skin(weapon, item, paint_kit_id, g_cfg->knife_changer.m_wear, g_cfg->knife_changer.m_seed, g_cfg->knife_changer.m_custom_name, local_pawn, selected_knife, g_item_schema->knives[g_cfg->knife_changer.m_knife].model_path);
-	c_hud::clear_hud_weapon_icon_for(weapon);
 
+	if (def_index == selected_knife && weapon->m_paint_kit() == paint_kit_id && !force_update)
+		return;
+
+	c_hud::clear_hud_weapon_icon_for(weapon);
 	did_update = true;
 }
 
@@ -210,15 +214,17 @@ void c_skin_changer::run(c_cs_player_pawn* observer_target, engine_data current)
 		if (!weapon || !weapon->m_entity()->is_safe_to_modify()) continue;
 
 		auto* item = weapon->m_attribute_manager()->m_item();
+
 		if (!valid_ptr(item)) continue;
 
 		const uint16_t def_index = item->m_definition_index();
+
 		const bool is_knife = (def_index == WEAPON_KNIFE || def_index == WEAPON_KNIFE_T || (def_index >= WEAPON_BAYONET && def_index <= WEAPON_KNIFEKUKRI));
 
 		if (is_knife && g_cfg->knife_changer.m_enabled)
-			process_knife(weapon, item, observer_target, true, did_update, current.m_steam_id);
+			process_knife(weapon, item, observer_target, should_update, did_update, current.m_steam_id);
 		else if (!is_knife && g_cfg->skin_changer.m_enabled)
-			process_weapon(weapon, item, observer_target, true, did_update, current.m_steam_id);
+			process_weapon(weapon, item, observer_target, should_update, did_update, current.m_steam_id);
 	}
 
 	if (did_update)
