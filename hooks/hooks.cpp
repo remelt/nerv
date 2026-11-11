@@ -467,11 +467,11 @@ int64_t __fastcall hooks::check_table::hk_check_table(i_network_string_table* pN
 	auto original = m_check_table.get_original<decltype(&hk_check_table)>();
 
 	int index = original(pNetworkStringTable, pPathVnmskel);
-	if (index == -1 && strstr(pPathVnmskel, "animation/skeletons/weapons/knife_"))
+	if (index == -1 && strstr(pPathVnmskel, "animation/skeletons"))
 	{
 		index = pNetworkStringTable->AddString(true, pPathVnmskel, nullptr);
 
-		LOG_INFO("CheckTable: Added knife skeleton: %s, index: %d", pPathVnmskel, index);
+		LOG_INFO("CheckTable: Added skeleton: %s, index: %d", pPathVnmskel, index);
 	}
 
 	return index;

@@ -63,6 +63,11 @@ void c_menu::rebuild_fonts(float scale) {
 		io.Fonts->AddFontDefault(&config);
 	}
 
+	config.MergeMode = true;
+	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\YuGothR.ttc", 14.0f * scale, &config, io.Fonts->GetGlyphRangesJapanese());
+	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 14.0f * scale, &config, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\malgun.ttf", 14.0f * scale, &config, io.Fonts->GetGlyphRangesKorean());
+
 	io.Fonts->Build();
 
 	ImGui_ImplDX11_InvalidateDeviceObjects();
