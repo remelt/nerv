@@ -43,30 +43,46 @@ void c_menu::rebuild_fonts(float scale) {
 	config.OversampleH = 2;
 	config.OversampleV = 1;
 	config.PixelSnapH = true;
+	config.MergeMode = false;
 
+	// https://learn.microsoft.com/ru-ru/typography/font-list/arial
 	ImFontGlyphRangesBuilder Builder;
-	Builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
 	Builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
-	Builder.AddRanges(io.Fonts->GetGlyphRangesThai());
 	Builder.AddRanges(io.Fonts->GetGlyphRangesVietnamese());
-	Builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
-	Builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
-	Builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+	Builder.AddRanges(io.Fonts->GetGlyphRangesGreek());
 
 	ImVector<ImWchar> AllRanges;
 	Builder.BuildRanges(&AllRanges);
 
-	//  "tahoma.ttf"  "segoeuib.ttf" (Segoe UI)  "arial.ttf"
-	ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\arial.ttf", 14.0f * scale, &config, AllRanges.Data);
+	static struct Fonts {
+		const char* Name = "";
+		const char* Path = "";
+		const ImWchar* GlyphRanges = nullptr;
+	};
 
-	if (font == nullptr) {
-		io.Fonts->AddFontDefault(&config);
+	// https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list
+	// download if u dont have them for some reason :p
+	std::vector<Fonts> AllFonts{
+		{ "Arial", "C:\\Windows\\Fonts\\Arial.ttf", AllRanges.Data },
+		{ "YuGothR", "C:\\Windows\\Fonts\\YuGothR.ttc", io.Fonts->GetGlyphRangesJapanese() },
+		{ "Msyh", "C:\\Windows\\Fonts\\Msyh.ttc", io.Fonts->GetGlyphRangesChineseSimplifiedCommon() },
+		{ "Malgun", "C:\\Windows\\Fonts\\Malgun.ttf", io.Fonts->GetGlyphRangesKorean() },
+		{ "Leelawui", "C:\\Windows\\Fonts\\Leelawui.ttf", io.Fonts->GetGlyphRangesThai() }
+	};
+
+	for (int i = 0; i < AllFonts.size(); i++) {
+		const auto& font = AllFonts[i];
+		if (i)
+			config.MergeMode = true; // allows us to use other fonts for japaneese, korean and chinese text
+
+		ImFont* new_font = io.Fonts->AddFontFromFileTTF(font.Path, config.SizePixels, &config, font.GlyphRanges);
+		if (new_font == nullptr) {
+			if (!i) // if the default font is missing for some reason
+				io.Fonts->AddFontDefault(&config);
+
+			LOG_ERROR("Failed to load font: %s", font.Name);
+		}
 	}
-
-	config.MergeMode = true;
-	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\YuGothR.ttc", 14.0f * scale, &config, io.Fonts->GetGlyphRangesJapanese());
-	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 14.0f * scale, &config, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\malgun.ttf", 14.0f * scale, &config, io.Fonts->GetGlyphRangesKorean());
 
 	io.Fonts->Build();
 

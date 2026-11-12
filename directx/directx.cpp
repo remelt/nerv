@@ -152,8 +152,10 @@ void c_directx::uninitialize() {
 }
 
 void c_directx::create_render_target() {
-	if (!m_swap_chain || !m_device)
+	if (!g_interfaces->m_swap_chain->pDXGISwapChain || !m_device)
 		return;
+
+	m_swap_chain = g_interfaces->m_swap_chain->pDXGISwapChain;
 
 	ID3D11Texture2D* back_buffer = nullptr;
 	if (SUCCEEDED(m_swap_chain->GetBuffer(0, IID_PPV_ARGS(&back_buffer)))) {
